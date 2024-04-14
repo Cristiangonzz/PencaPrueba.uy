@@ -1,0 +1,80 @@
+<head>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <link href="match.component.css" rel="stylesheet" />
+</head>
+
+
+
+<div class="container">
+
+  <div *ngFor="let match of matches; let srNo  = index">
+
+
+    <!-- code here -->
+    <div class="match">
+      <div class="match-header">
+        <div class="match-status">Live</div>
+        <div class="match-tournament"><img src="{{match?.competition?.emblem}}" />{{match?.competition?.name}}</div>
+        <div class="match-actions">
+          <button class="btn-icon"><i class="material-icons-outlined">grade</i></button>
+          <button class="btn-icon"><i class="material-icons-outlined">add_alert</i></button>
+        </div>
+      </div>
+
+      <div class="match-content">
+        <div class="column">
+          <div class="team team--home">
+            <div class="team-logo">
+              <img src="{{match?.homeTeam?.crest}}" />
+            </div>
+            <h2 class="team-name">{{match?.homeTeam?.name}}</h2>
+          </div>
+        </div>
+        <div class="column">
+          <div class="match-details">
+            <div class="match-date">
+              12 Aug at <strong>19:00</strong>
+            </div>
+
+            <div class="match-score" *ngIf="match?.status != 'TIMED'" >
+              <span class="match-score-number match-score-number--leading">{{match?.score?.fullTime?.home}}</span>
+              <span class="match-score-divider">:</span>
+              <span class="match-score-number">{{match?.score?.fullTime?.away}}</span>
+            </div>
+
+            <div class="match-score"*ngIf="match?.status === 'TIMED'">
+              <span class="match-score-number match-score-number--leading">0</span>
+              <span class="match-score-divider">:</span>
+              <span class="match-score-number">0</span>
+            </div>
+
+            <!--<div class="match-time-lapsed">
+
+  </div>-->
+            <!--<div class="match-referee">
+    Referee: <strong>Joseph Hicks</strong>
+  </div>-->
+            <!--<div class="match-bet-options">
+    <button class="match-bet-option">1.48</button>
+    <button class="match-bet-option">4.98</button>
+    <button class="match-bet-option">8.24</button>
+  </div>-->
+            <button class="match-bet-place">Place a bet</button>
+          </div>
+        </div>
+        <div class="column">
+          <div class="team team--away">
+            <div class="team-logo">
+              <img src="{{match?.awayTeam?.crest}}" />
+            </div>
+            <h2 class="team-name">{{match?.awayTeam?.name}}</h2>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+
+  </div>
+</div>
+

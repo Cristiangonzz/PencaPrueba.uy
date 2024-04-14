@@ -1,0 +1,61 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.9.34723.18
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WordPenca.Backoffice", "WordPenca.Backoffice\WordPenca.Backoffice.csproj", "{9B195A87-C6A9-4B16-9DF2-A27D0E190989}"
+	ProjectSection(ProjectDependencies) = postProject
+		{E7830C79-7AF1-4943-89F3-CCEA06A4205E} = {E7830C79-7AF1-4943-89F3-CCEA06A4205E}
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WordPenca.Api", "WordPenca.Api\WordPenca.Api.csproj", "{A9C7B4F3-D0C7-45BD-9130-85A2AA502894}"
+	ProjectSection(ProjectDependencies) = postProject
+		{AA492A0E-24AD-469C-BFC1-B3FA5312D45C} = {AA492A0E-24AD-469C-BFC1-B3FA5312D45C}
+		{E7830C79-7AF1-4943-89F3-CCEA06A4205E} = {E7830C79-7AF1-4943-89F3-CCEA06A4205E}
+	EndProjectSection
+EndProject
+Project("{54A90642-561A-4BB1-A94E-469ADEE60C69}") = "WordPenca.Frontend", "WordPenca.Frontend\WordPenca.Frontend.esproj", "{5699B3CD-C325-4AC0-B58D-C478C0788D43}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WordPenca.Common", "WordPenca.Common\WordPenca.Common.csproj", "{AA492A0E-24AD-469C-BFC1-B3FA5312D45C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WordPenca.Business", "WordPenca.Business\WordPenca.Business.csproj", "{E7830C79-7AF1-4943-89F3-CCEA06A4205E}"
+	ProjectSection(ProjectDependencies) = postProject
+		{AA492A0E-24AD-469C-BFC1-B3FA5312D45C} = {AA492A0E-24AD-469C-BFC1-B3FA5312D45C}
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{9B195A87-C6A9-4B16-9DF2-A27D0E190989}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9B195A87-C6A9-4B16-9DF2-A27D0E190989}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9B195A87-C6A9-4B16-9DF2-A27D0E190989}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9B195A87-C6A9-4B16-9DF2-A27D0E190989}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A9C7B4F3-D0C7-45BD-9130-85A2AA502894}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A9C7B4F3-D0C7-45BD-9130-85A2AA502894}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A9C7B4F3-D0C7-45BD-9130-85A2AA502894}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A9C7B4F3-D0C7-45BD-9130-85A2AA502894}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5699B3CD-C325-4AC0-B58D-C478C0788D43}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5699B3CD-C325-4AC0-B58D-C478C0788D43}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5699B3CD-C325-4AC0-B58D-C478C0788D43}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{5699B3CD-C325-4AC0-B58D-C478C0788D43}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5699B3CD-C325-4AC0-B58D-C478C0788D43}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5699B3CD-C325-4AC0-B58D-C478C0788D43}.Release|Any CPU.Deploy.0 = Release|Any CPU
+		{AA492A0E-24AD-469C-BFC1-B3FA5312D45C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AA492A0E-24AD-469C-BFC1-B3FA5312D45C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AA492A0E-24AD-469C-BFC1-B3FA5312D45C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AA492A0E-24AD-469C-BFC1-B3FA5312D45C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E7830C79-7AF1-4943-89F3-CCEA06A4205E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E7830C79-7AF1-4943-89F3-CCEA06A4205E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E7830C79-7AF1-4943-89F3-CCEA06A4205E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E7830C79-7AF1-4943-89F3-CCEA06A4205E}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {0BB12203-3A0B-4DB2-9EA3-087D8337449B}
+	EndGlobalSection
+EndGlobal

@@ -1,0 +1,36 @@
+<head>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <link href="../../../app.component.css" rel="stylesheet" />
+</head>
+
+
+<app-create-equipo></app-create-equipo>
+<!-- Page Heading -->
+<h1 class="h3 mb-2 text-gray-800 animated fast fadeIn" >Tables</h1>
+
+
+<!-- DataTales Example -->
+<div class="card shadow mb-4 animated fast fadeIn" >
+  <div class="card-header py-3">
+    <h6 class="m-0 font-weight-bold text-primary">DataTables Example</h6>
+  </div>
+  <div class="card-body">
+    <div class="table-responsive">
+      <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+        <thead>
+          <tr>
+            <th>Name</th>
+          </tr>
+        </thead>
+        <tbody *ngIf="data$ | async as data">
+          <tr *ngFor="let equipo of data.value; let srNo  = index">
+            <td>{{equipo.name}}</td>
+          </tr>
+
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+

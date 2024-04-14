@@ -1,0 +1,19 @@
+<div style="margin-left: 30%;">
+  <form (ngSubmit)="send()" [formGroup]="FormCreate" class="align-items-center">
+    <section>
+      <h1 style="margin: 15px;color:rgb(8, 82, 141);"> Create Equipo</h1>
+    </section>
+
+    <div class="col-md-6">
+      <input class="form-control" [formControl]="FormCreate.controls.name"  type="text"  label="Name"  placeHolder="nombre del equipo ..."/>
+     <!-- <app-input [control]="FormCreate.controls.name" type="text" label="Name" placeHolder=""></app-input>-->
+    </div>
+
+    <div class="col-12">
+      <button [disabled]="FormCreate.invalid" class="btn btn-primary">Confirmar</button>
+      <button style="margin: 20px;" class="btn btn-dark" routerLink="">Cancelar</button>
+    </div>
+
+
+  </form>
+</div>
