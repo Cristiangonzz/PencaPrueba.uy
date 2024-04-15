@@ -1,19 +1,19 @@
-﻿//using AngularApp1.Server.infraestructure.db;
-//using Microsoft.AspNetCore.Http;
-//using Microsoft.AspNetCore.Mvc;
+﻿
+using Microsoft.AspNetCore.Mvc;
+using WordPenca.Business.Persistence;
 
-//namespace AngularApp1.Server.Infraestructure.Controllers
-//{
-//    [Route("api/[controller]")]
-//    [ApiController]
-//    public class ClasificacionController : ControllerBase
-//    {
+namespace WordPenca.Api.Controllers
+{
+    [Route("api/[controller]")]
+    [ApiController]
+    public class ClasificacionController : ControllerBase
+    {
 
-//        public readonly ApplicationDbContext dbContext;
+        public readonly ApplicationDbContext dbContext;
 
-//        public ClasificacionController(ApplicationDbContext dbContext)
-//        {
-//            this.dbContext = dbContext;
-//        }
-//    }
-//}
+        public ClasificacionController(ApplicationDbContext dbContext)
+        {
+            this.dbContext = dbContext;
+        }
+    }
+}

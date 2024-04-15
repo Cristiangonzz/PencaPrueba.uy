@@ -1,1 +1,25 @@
-<p>signin works!</p>
+
+
+<section class="register-account">
+  <div class="signform">
+    <div class="right">
+      <form style="margin-left: 30%;" [formGroup]="formLogin">
+        <div class="container-fluid">
+          <section>
+            <h1 style="margin: 15px;color:rgb(8, 82, 141);font-family:'Times New Roman', Times, serif;font-size: 25px;">Iniciar Sesion</h1>
+          </section>
+          <div class="row">
+            <div class="col-12 col-md-6">
+              <app-form [control]="formLogin.controls.email" type="email" label="Email" placeHolder="ejemplo@gmail.com"></app-form>
+              <app-form [control]="formLogin.controls.clave" type="password" label="Password" placeHolder=""></app-form>
+            </div>
+          </div>
+          <a class="container" type="submit" (click)="registrarse()" style="color: blue;">Registrarse</a>
+          <button type="submit" class="subbt" (click)="signIn()" style="width: 200px;"> Ingresar </button>
+          <a class="container" type="submit" (click)="generarClave()" style="color: rgb(0, 0, 255);">Olvide la contraseña</a>
+
+        </div>
+      </form>
+    </div>
+  </div>
+</section>

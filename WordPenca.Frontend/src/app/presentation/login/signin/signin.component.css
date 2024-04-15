@@ -1,0 +1,89 @@
+.register-account {
+  padding-top: 50px;
+  padding-right: 0px;
+  padding-left: 0px;
+  width: auto;
+}
+
+
+
+.signform {
+  background-color: #FFF;
+  padding-bottom: 40px;
+  padding-top: 35px;
+  margin: 0 auto;
+  margin-top: auto;
+}
+
+
+
+
+
+
+.gplogin {
+  background-color: #dd4c39;
+}
+
+  .gplogin:hover {
+    background-color: #f06e60;
+  }
+
+  .gplogin:active {
+    position: relative;
+    top: 1px;
+  }
+
+.twlogin {
+  background-color: #00abee;
+}
+
+  .twlogin:hover {
+    background-color: #4cbde6;
+  }
+
+  .twlogin:active {
+    position: relative;
+    top: 1px;
+  }
+
+.login-form input:focus, .login-form input:active {
+  border-bottom: 2px solid #79B42B;
+  outline: none;
+}
+
+.subbt:hover {
+  background-color: #3B3DEB;
+}
+
+.subbt {
+  text-shadow: 0 1px 0 rgba(122, 122, 122, 0.85);
+  transition: background 500ms ease-in-out 0s;
+  -webkit-transition: background 500ms ease-in-out 0s;
+  -moz-transition: background 500ms ease-in-out 0s;
+  -o-transition: background 500ms ease-in-out 0s;
+  -ms-transition: background 500ms ease-in-out 0s;
+  background-color: #3B3DEB;
+  border: none;
+  color: #FFF;
+  padding: 10px 15px 10px 15px;
+  margin-top: 10px;
+  cursor: pointer;
+  font-size: .9em;
+  border-radius: 3px;
+  width: 218px;
+  font-family: 'Arimo', sans-serif;
+  font-weight: 700;
+  font-style: normal;
+}
+
+
+
+
+
+
+
+@media screen and (max-width: 1400px) and (min-width: 1230px) {
+  .signform {
+    width: 50%
+  }
+}

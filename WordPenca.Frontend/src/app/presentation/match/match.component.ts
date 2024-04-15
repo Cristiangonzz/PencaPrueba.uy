@@ -29,7 +29,7 @@ export class MatchComponent implements OnInit {
 
 
   getAll() {
-    var URL = 'http://localhost:5046/Equipo/matches';
+    var URL = 'http://localhost:5118/Equipo/matches';
     return this.http.get(URL).subscribe(x => {
       var match: IAllMatchesDomain;
       match = x as IAllMatchesDomain;

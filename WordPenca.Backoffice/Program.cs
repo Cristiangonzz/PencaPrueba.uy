@@ -1,5 +1,3 @@
-
-
 using Microsoft.EntityFrameworkCore;
 using WordPenca.Business.Domain;
 using WordPenca.Business.Persistence;
@@ -22,7 +20,7 @@ builder.Services.AddScoped<IClasificacionRepository, ClasificacionRepository>();
 builder.Services.AddScoped<IPartidoRepository, PartidoRepository>();
 builder.Services.AddScoped<ITablaRepository, TablaRepository>();
 builder.Services.AddScoped<ICampionatoRepository, CampionatoRepository>();
-
+builder.Services.Configure<RouteOptions>(options => options.LowercaseUrls = true);
 
 var app = builder.Build();
 

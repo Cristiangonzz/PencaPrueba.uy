@@ -5,7 +5,6 @@ import { Observable, map } from 'rxjs';
 import { EquipoDomainEntity } from '../../../domain/entity/EquipoEntity';
 import { CreateEquipoDto } from '../../dto/create/CreateEquipoDTO';
 import { UpdateEquipoDto } from '../../dto/create/UpdateEquipoDTO';
-import { EquipoGetAllDTO } from '../../dto/get/EquipoGetAllDTO';
 import { ResponseDomainEntity } from '../../../domain/entity/ResponseEntity';
 
 @Injectable({
@@ -13,21 +12,11 @@ import { ResponseDomainEntity } from '../../../domain/entity/ResponseEntity';
 })
 export class EquipoImplentationService extends EquipoService {
  
-  URL = 'http://localhost:5046';
+  URL = 'http://localhost:5118';
   
   constructor(private http: HttpClient) {
     super();
   }
-
-  //httpOptions = {
-  //  headers: new HttpHeaders({
-  //    'Access-Control-Allow-Headers': 'Content-Type',
-  //    'Access-Control-Allow-Methods': 'POST,GET,PUT,DELETE',
-  //    'Access-Control-Allow-Origin': '*',
-  //  }),
-  //};
-  // Función para transformar el objeto recibido en Angular a instancias de EquipoDomainEntity
-
 
   getAll(): Observable<ResponseDomainEntity<EquipoDomainEntity[]>> {
 

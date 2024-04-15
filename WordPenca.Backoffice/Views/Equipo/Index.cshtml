@@ -1,0 +1,40 @@
+﻿@model IEnumerable<WordPenca.Business.Domain.Equipo>
+
+@{
+    ViewData["Title"] = "Equipo Page";
+}
+
+<a asp-action="Create" class="btn btn-primary">Create</a>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th scope="col">Id</th>
+            <th scope="col">Nombre</th>
+            <th scope="col">Color</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.id</td>
+                <td>@item.name</td>
+                @if (item.activo == true)
+                {
+                    <td>Activo</td>
+                }
+                else
+                {
+                    <td>Inactivo</td>
+                }
+
+                <!-- Actions Buttons -->
+                <td class="text-center">
+                    <a asp-action="Edit" asp-route-id="@item.id" class="btn btn-primary">Edit</a>
+                    <a asp-action="Delete" asp-route-id="@item.id" class="btn btn-danger">Delete</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

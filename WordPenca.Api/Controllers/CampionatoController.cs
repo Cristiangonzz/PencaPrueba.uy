@@ -1,19 +1,19 @@
 ﻿
-//using Microsoft.AspNetCore.Http;
-//using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
+using WordPenca.Business.Persistence;
 
-//namespace AngularApp1.Server.Infraestructure.Controllers
-//{
-//    [Route("api/[controller]")]
-//    [ApiController]
-//    public class CampionatoController : ControllerBase
-//    {
+namespace WordPenca.Api.Controllers
+{
+    [Route("api/[controller]")]
+    [ApiController]
+    public class CampionatoController : ControllerBase
+    {
 
-//        public readonly ApplicationDbContext dbContext;
+        public readonly ApplicationDbContext dbContext;
 
-//        public CampionatoController(ApplicationDbContext dbContext)
-//        {
-//            this.dbContext = dbContext;
-//        }
-//    }
-//}
+        public CampionatoController(ApplicationDbContext dbContext)
+        {
+            this.dbContext = dbContext;
+        }
+    }
+}

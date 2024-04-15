@@ -1,0 +1,24 @@
+﻿@model WordPenca.Business.Domain.Equipo
+
+@* create a pretty form to disaply the product details *@
+
+<h1>Product Details</h1>
+
+<form asp-action="Details" method="post" asp-route-id="@Model.id">
+
+    <div class="form-group">
+        <label asp-for="id" class="control-label"></label>
+        <input asp-for="id" class="form-control" disabled />
+    </div>
+
+    <div class="form-group">
+        <label asp-for="name" class="control-label"></label>
+        <input asp-for="name" class="form-control" readonly />
+    </div>
+
+    <div>
+        <input type="submit"
+               class="btn btn-primary mt-2"
+               value="Save" />
+    </div>
+</form>

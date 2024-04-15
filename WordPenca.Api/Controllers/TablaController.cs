@@ -1,19 +1,19 @@
 ﻿
+using Microsoft.AspNetCore.Mvc;
+using WordPenca.Business.Persistence;
 
-//using Microsoft.AspNetCore.Mvc;
+namespace WordPenca.Api.Controllers
+{
+    [Route("api/[controller]")]
+    [ApiController]
+    public class TablaController : ControllerBase
+    {
 
-//namespace AngularApp1.Server.Infraestructure.Controllers
-//{
-//    [Route("api/[controller]")]
-//    [ApiController]
-//    public class TablaController : ControllerBase
-//    {
+        public readonly ApplicationDbContext dbContext;
 
-//        public readonly ApplicationDbContext dbContext;
-
-//        public TablaController(ApplicationDbContext dbContext)
-//        {
-//            this.dbContext = dbContext;
-//        }
-//    }
-//}
+        public TablaController(ApplicationDbContext dbContext)
+        {
+            this.dbContext = dbContext;
+        }
+    }
+}
