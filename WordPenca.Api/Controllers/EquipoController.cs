@@ -2,28 +2,33 @@
 using Microsoft.AspNetCore.Mvc;
 using WordPenca.Common.Dto;
 using WordPenca.Business.Domain;
-using WordPenca.Business.Service;
+using Microsoft.AspNetCore.SignalR;
+using WordPenca.Api.Hubs;
+using WordPenca.Business.Repository.Interface;
+
 
 namespace WordPenca.Api.Controllers
 {
+
     [ApiController]
     [Route("[controller]")]
     public class EquipoController : ControllerBase
     {
 
-        private readonly IEquipoRepository _equipoRepositorio;
+        private readonly IUnitOfWork _unitOfWork;
 
         private readonly IMapper _mapper;
 
-        private readonly IHttpClientFactory _httpClientFactory;
+        private readonly IHubContext<MessageHub> _hubContext;
 
-        public EquipoController(IHttpClientFactory httpClientFactory, IEquipoRepository equipoRepositorio, IMapper mapper)
+        private readonly IHttpClientFactory _httpClientFactory;
+        public EquipoController(IHttpClientFactory httpClientFactory, IUnitOfWork unitOfWork, IMapper mapper, IHubContext<MessageHub> hubContext)
         {
-            this._equipoRepositorio = equipoRepositorio;
+            this._unitOfWork = unitOfWork;
             this._mapper = mapper;
             _httpClientFactory = httpClientFactory;
+            _hubContext = hubContext;
         }
-
 
 
         [HttpGet]
@@ -41,17 +46,21 @@ namespace WordPenca.Api.Controllers
                     { "X-Auth-Token", "5e5f4b403ed749dcb7065634af5e8dc4" }
                 },
             };
+            string chatId = "";
+            string usuarioId = "";
 
+            NewMessage message = new NewMessage("Sistema", "Api de Match", chatId, usuarioId);
             using (var response = await client.SendAsync(request))
             {
                 response.EnsureSuccessStatusCode();
-
-
 
                 if (response.IsSuccessStatusCode)
                 {
                     var body = await response.Content.ReadAsStringAsync();
                     Console.WriteLine(body);
+
+                    await _hubContext.Clients.Group(message.ChatId).SendAsync("NewMessage", message);
+
                     return StatusCode(StatusCodes.Status200OK, body);
                 }
                 else
@@ -62,40 +71,6 @@ namespace WordPenca.Api.Controllers
 
             }
 
-
-
-            //ResponseDTO<MatchDTO> _ResponseDTO = new ResponseDTO<MatchDTO>();
-
-
-            //// Configura la URL de la API externa
-            //var url = "https://api.football-data.org/v4/matches";
-
-            //// Configura el token de autenticación si es necesario
-            //client.DefaultRequestHeaders.Add("X-Auth-Token", "5e5f4b403ed749dcb7065634af5e8dc4");
-
-            //try
-            //{
-            //    // Realiza la solicitud HTTP GET a la API externa
-            //    var response = await client.GetAsync(url);
-
-            //    // Verifica si la solicitud fue exitosa (código de estado 200)
-            //    if (response.IsSuccessStatusCode)
-            //    {
-            //        var responseStream = await response.Content.ReadAsStreamAsync();
-
-            //        return StatusCode(StatusCodes.Status200OK, responseStream);
-            //    }
-            //    else
-            //    {
-            //        // Si la solicitud no fue exitosa, devuelve el código de estado de la respuesta
-            //        return StatusCode((int)response.StatusCode);
-            //    }
-            //}
-            //catch (HttpRequestException)
-            //{
-            //    // Si ocurre un error al realizar la solicitud, devuelve un código de estado 500 (Error interno del servidor)
-            //    return StatusCode(500);
-            //}
         }
 
 
@@ -110,10 +85,11 @@ namespace WordPenca.Api.Controllers
             {
                 Equipo _producto = _mapper.Map<Equipo>(request);
 
-                Equipo _productoCreado = await _equipoRepositorio.Create(_producto);
 
-                if (_productoCreado.name != null)
-                    _ResponseDTO = new ResponseDTO<EquipoDTO>() { status = true, msg = "ok", value = _mapper.Map<EquipoDTO>(_productoCreado) };
+                 _producto = await this._unitOfWork.Equipo.Add(_producto);
+
+                if (_producto.id != null)
+                    _ResponseDTO = new ResponseDTO<EquipoDTO>() { status = true, msg = "ok", value = _mapper.Map<EquipoDTO>(_producto) };
                 else
                     _ResponseDTO = new ResponseDTO<EquipoDTO>() { status = false, msg = "No se pudo crear el producto" };
 
@@ -134,14 +110,14 @@ namespace WordPenca.Api.Controllers
 
             try
             {
-                List<EquipoDTO> ListaEquipos = new List<EquipoDTO>();
-                IQueryable<Equipo> query = await _equipoRepositorio.Consultar();
-                // query = query.Include(r => r.IdCategoriaNavigation);
+                List<EquipoDTO> ListaEquiposDto = new List<EquipoDTO>();
+                IEnumerable<Equipo> listEquipos =  await this._unitOfWork.Equipo.GetAll();
+                
 
-                ListaEquipos = _mapper.Map<List<EquipoDTO>>(query.ToList());
+                ListaEquiposDto = _mapper.Map<List<EquipoDTO>>(listEquipos.ToList());
 
-                if (ListaEquipos.Count > 0)
-                    _ResponseDTO = new ResponseDTO<List<EquipoDTO>>() { status = true, msg = "ok", value = ListaEquipos };
+                if (ListaEquiposDto.Count > 0)
+                    _ResponseDTO = new ResponseDTO<List<EquipoDTO>>() { status = true, msg = "ok", value = ListaEquiposDto };
                 else
                     _ResponseDTO = new ResponseDTO<List<EquipoDTO>>() { status = false, msg = "Lista Vacia", value = null };
 
@@ -166,20 +142,24 @@ namespace WordPenca.Api.Controllers
             try
             {
                 Equipo _equipo = _mapper.Map<Equipo>(request);
-                Equipo _equipoParaEditar = await _equipoRepositorio.Obtener(u => u.id == id);
+                Equipo _equipoParaEditar = await this._unitOfWork.Equipo.GetFirstOrDefault(u => u.id == id);
 
                 if (_equipoParaEditar != null)
                 {
 
                     _equipoParaEditar.name = _equipo.name;
 
-
-                    bool respuesta = await _equipoRepositorio.Update(_equipoParaEditar);
-
-                    if (respuesta)
+                    try
+                    {
+                        this._unitOfWork.Equipo.Update(_equipoParaEditar);
                         _ResponseDTO = new ResponseDTO<bool>() { status = true, msg = "ok", value = true };
-                    else
-                        _ResponseDTO = new ResponseDTO<bool>() { status = false, msg = "No se pudo editar el producto" };
+
+                    }
+                    catch(Exception ex)
+                    {
+                        _ResponseDTO = new ResponseDTO<bool>() { status = false, msg = "No se pudo editar el producto : " + ex.Message };
+                        return StatusCode(StatusCodes.Status500InternalServerError, _ResponseDTO);
+                    }
                 }
                 else
                 {
@@ -194,13 +174,5 @@ namespace WordPenca.Api.Controllers
                 return StatusCode(StatusCodes.Status500InternalServerError, _ResponseDTO);
             }
         }
-
-
-
-
     }
-
-
-
-
 }

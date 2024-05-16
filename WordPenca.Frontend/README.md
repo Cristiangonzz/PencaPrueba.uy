@@ -1,3 +1,7 @@
+ChatId: 70EA9642-CB93-4109-8E6B-08DC75417902
+UsuarioId1: 5293DFD2-647D-4C50-B70C-08DC75415A51
+UsuarioId2: 5293DFD2-647D-4C50-B70C-08DC75415A52
+
 # WordPencaFrontend
 
 This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 17.2.0.

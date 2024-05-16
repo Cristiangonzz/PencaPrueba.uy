@@ -22,6 +22,51 @@ namespace WordPenca.Backoffice.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.Entity("ChatUsuario", b =>
+                {
+                    b.Property<Guid>("ChatId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("UsuariosId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("ChatId", "UsuariosId");
+
+                    b.HasIndex("UsuariosId");
+
+                    b.ToTable("ChatUsuario");
+                });
+
+            modelBuilder.Entity("WordPenca.Business.Domain.Apuesta", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreationDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("GolesLocal")
+                        .HasColumnType("int");
+
+                    b.Property<int>("GolesVisitante")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("Partidoid")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("UsuarioId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Partidoid");
+
+                    b.HasIndex("UsuarioId");
+
+                    b.ToTable("Apuestas");
+                });
+
             modelBuilder.Entity("WordPenca.Business.Domain.Campionato", b =>
                 {
                     b.Property<Guid>("Id")
@@ -41,7 +86,83 @@ namespace WordPenca.Backoffice.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Campionatos");
+                    b.ToTable("Campeonatos");
+                });
+
+            modelBuilder.Entity("WordPenca.Business.Domain.Chat", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreationDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("imagen")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("privado")
+                        .HasColumnType("bit");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Chats");
+                });
+
+            modelBuilder.Entity("WordPenca.Business.Domain.ChatHistorial", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("UltimaActualizacion")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ChatHistorial");
+                });
+
+            modelBuilder.Entity("WordPenca.Business.Domain.ChatMensaje", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("ChatHistorialId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreationDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("RespuestaMensaje")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("UsuarioId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("activo")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("mensaje")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ChatHistorialId");
+
+                    b.HasIndex("UsuarioId");
+
+                    b.ToTable("ChatMensajes");
                 });
 
             modelBuilder.Entity("WordPenca.Business.Domain.Clasificacion", b =>
@@ -169,6 +290,118 @@ namespace WordPenca.Backoffice.Migrations
                     b.ToTable("Tablas");
                 });
 
+            modelBuilder.Entity("WordPenca.Business.Domain.Usuario", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreationDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Password")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Role")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("URLFotoPerfil")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Usuarios");
+                });
+
+            modelBuilder.Entity("WordPenca.Business.Models.Penca", b =>
+                {
+                    b.Property<decimal>("Comision")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<DateOnly>("FechaFin")
+                        .HasColumnType("date");
+
+                    b.Property<DateOnly>("FechaInicio")
+                        .HasColumnType("date");
+
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.ToTable("penca");
+                });
+
+            modelBuilder.Entity("ChatUsuario", b =>
+                {
+                    b.HasOne("WordPenca.Business.Domain.Chat", null)
+                        .WithMany()
+                        .HasForeignKey("ChatId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("WordPenca.Business.Domain.Usuario", null)
+                        .WithMany()
+                        .HasForeignKey("UsuariosId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("WordPenca.Business.Domain.Apuesta", b =>
+                {
+                    b.HasOne("WordPenca.Business.Domain.Partido", "Partido")
+                        .WithMany()
+                        .HasForeignKey("Partidoid")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("WordPenca.Business.Domain.Usuario", "Usuario")
+                        .WithMany()
+                        .HasForeignKey("UsuarioId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Partido");
+
+                    b.Navigation("Usuario");
+                });
+
+            modelBuilder.Entity("WordPenca.Business.Domain.ChatHistorial", b =>
+                {
+                    b.HasOne("WordPenca.Business.Domain.Chat", "chat")
+                        .WithOne("Historial")
+                        .HasForeignKey("WordPenca.Business.Domain.ChatHistorial", "Id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("chat");
+                });
+
+            modelBuilder.Entity("WordPenca.Business.Domain.ChatMensaje", b =>
+                {
+                    b.HasOne("WordPenca.Business.Domain.ChatHistorial", null)
+                        .WithMany("Mensajes")
+                        .HasForeignKey("ChatHistorialId");
+
+                    b.HasOne("WordPenca.Business.Domain.Usuario", "Usuario")
+                        .WithMany("Mensajes")
+                        .HasForeignKey("UsuarioId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Usuario");
+                });
+
             modelBuilder.Entity("WordPenca.Business.Domain.Clasificacion", b =>
                 {
                     b.HasOne("WordPenca.Business.Domain.Equipo", "Equipo")
@@ -211,6 +444,17 @@ namespace WordPenca.Backoffice.Migrations
                     b.Navigation("Equipos");
                 });
 
+            modelBuilder.Entity("WordPenca.Business.Domain.Chat", b =>
+                {
+                    b.Navigation("Historial")
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("WordPenca.Business.Domain.ChatHistorial", b =>
+                {
+                    b.Navigation("Mensajes");
+                });
+
             modelBuilder.Entity("WordPenca.Business.Domain.Partido", b =>
                 {
                     b.Navigation("equipos");
@@ -219,6 +463,11 @@ namespace WordPenca.Backoffice.Migrations
             modelBuilder.Entity("WordPenca.Business.Domain.Tabla", b =>
                 {
                     b.Navigation("Clasificaciones");
+                });
+
+            modelBuilder.Entity("WordPenca.Business.Domain.Usuario", b =>
+                {
+                    b.Navigation("Mensajes");
                 });
 #pragma warning restore 612, 618
         }

@@ -1,6 +1,6 @@
-﻿using Microsoft.AspNetCore.Diagnostics;
+﻿
 using Microsoft.AspNetCore.Mvc;
-using WordPenca.Backoffice.Models;
+
 using WordPenca.Business.Domain;
 using WordPenca.Business.Persistence;
 

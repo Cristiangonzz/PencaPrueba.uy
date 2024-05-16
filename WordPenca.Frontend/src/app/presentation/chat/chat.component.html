@@ -1,0 +1,66 @@
+<div *ngIf="!joined">
+  <strong>Create a group</strong>
+  <div class="form-group row mb-2">
+    <label class="col-form-label col-md-3">Chat IP </label>
+    <div class="col-md-9">
+      <input type="text" class="form-control" name="chatId" [(ngModel)]="chatId" />
+    </div>
+  </div>
+  <div class="form-group row mb-2">
+    <label class="col-form-label col-md-3">Usuario IP</label>
+    <div class="col-md-9">
+      <input type="text" class="form-control" name="UsuarioId" [(ngModel)]="UsuarioId" />
+    </div>
+  </div>
+  <div class="form-group row">
+    <div class="col-md-9 offset-3">
+      <button type="button" class="btn btn-primary" (click)="join()">
+        Enter
+      </button>
+    </div>
+  </div>
+</div>
+
+<div *ngIf="joined">
+  <!-- <div id="chat">
+    <div *ngFor="let message of conversation">
+
+      
+      <div><strong>{{message.userName}}:</strong> {{message.message}}</div>
+    </div>
+  </div>
+  <input class="form-control mb-1" type="text" [(ngModel)]="messageToSend" name="messageToSend" />
+  <button class="btn btn-primary" (click)="sendMessage()">Send</button>
+  <button class="btn btn-secondary" (click)="leave()">Leave</button> -->
+  <div class="container mt-5">
+
+    <div class="chat_header">
+      <h3 class="text-center my-2">Welcome to <span class="text-warning">ROOM</span> Group</h3>
+      <button (click)="leave()" class="btn btn-danger">Leave Chat</button>
+    </div>
+  
+        <div class="mesgs">
+          <div #scrollMe class="msg_history">
+            <div *ngFor="let message of conversation">
+             
+                  <div class="received_withd_msg">
+                    <p> {{message.message}}</p>
+                    <span class="time_date">{{message.userName}}</span>
+                  </div>
+                
+             
+                </div>
+          </div>
+          <div class="type_msg">
+            <div class="input_msg_write">
+              <input (keydown.enter)="sendMessage()" [(ngModel)]="messageToSend" type="text" class="write_msg"
+                placeholder="Type a message" />
+              <button (click)="sendMessage()" class="msg_send_btn" type="button"><i class="fa fa-paper-plane-o"
+                  aria-hidden="true"></i></button>
+            </div>
+          </div>
+        </div>
+  
+  </div>
+
+

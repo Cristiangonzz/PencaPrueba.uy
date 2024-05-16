@@ -20,6 +20,12 @@ const routes: Routes = [
     loadChildren: () =>
       import('./presentation/equipo/equipo.module').then((m) => m.EquipoModule),
   },
+  {
+    path: 'chat',
+    //canActivate: [BackGuard],
+    loadChildren: () =>
+      import('./presentation/chat/chat.module').then((m) => m.ChatModule),
+  },
 
   {
     path: 'Match',

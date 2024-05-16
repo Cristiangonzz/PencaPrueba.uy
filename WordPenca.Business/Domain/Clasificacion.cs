@@ -1,10 +1,10 @@
 ﻿namespace WordPenca.Business.Domain
 {
-    public class Clasificacion
+    public class Clasificacion 
     {
         public Guid Id { get; set; }
         public Equipo Equipo { get; set; }
-        public int Point { get; set; }
+        public int Point { get; set; } 
         public int Posicion { get; set; }
         public int PartidosJugados { get; set; }
         public int GolesAF { get; set; }

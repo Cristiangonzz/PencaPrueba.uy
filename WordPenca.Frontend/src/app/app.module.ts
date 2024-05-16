@@ -10,18 +10,23 @@ import { shareModule } from './presentation/share/share.module';
 import { LoginModule } from './presentation/login/login.module';
 import { EquipoModule } from './presentation/equipo/equipo.module';
 import { MatchModule } from './presentation/match/match.module';
-
-
+import { ChatModule } from './presentation/chat/chat.module';
 
 @NgModule({
-  declarations: [
-    AppComponent,
-  ],
+  declarations: [AppComponent],
   imports: [
-    BrowserModule, HttpClientModule,
-    AppRoutingModule, InfraestructureModule, HomeModule, shareModule, LoginModule, EquipoModule, MatchModule
+    BrowserModule,
+    HttpClientModule,
+    AppRoutingModule,
+    InfraestructureModule,
+    HomeModule,
+    shareModule,
+    LoginModule,
+    EquipoModule,
+    MatchModule,
+    ChatModule,
   ],
   providers: [],
-  bootstrap: [AppComponent]
+  bootstrap: [AppComponent],
 })
-export class AppModule { }
+export class AppModule {}

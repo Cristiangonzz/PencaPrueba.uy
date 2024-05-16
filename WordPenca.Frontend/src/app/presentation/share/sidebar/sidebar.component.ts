@@ -18,4 +18,7 @@ export class SidebarComponent {
   inicio() {
     this.router.navigate(['/index']);
   }
+  chat() {
+    this.router.navigate(['/chat']);
+  }
 }

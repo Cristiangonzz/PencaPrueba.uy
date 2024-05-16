@@ -6,6 +6,7 @@ import { Router } from '@angular/router';
 import { ResponseDomainEntity } from '../../../domain/entity/ResponseEntity';
 import { Observable, Subscription } from 'rxjs';
 import { IMatcheDomain } from '../../../domain/interfaces/ApiMatches/IMatcheDomain';
+import { FormControl } from '@angular/forms';
 
 
 @Component({
@@ -19,6 +20,9 @@ export class ListAllComponent implements OnInit, AfterViewInit {
   mostrarComponente: boolean = false;
   matches!: IMatcheDomain[];
 
+  //Puebla de WebSocket
+
+  messages: string[] = [];
 
   data$!: Observable<ResponseDomainEntity<EquipoDomainEntity[]>>;
   //@Input() crearCategoria!: boolean;
@@ -29,12 +33,10 @@ export class ListAllComponent implements OnInit, AfterViewInit {
     private equipoService: EquipoService,
     private router: Router,
 
-  ) { }
-
- 
- 
-
+  ) {
   
+  }
+
  
   ngAfterViewInit(): void {
     window.scroll(0, 0)
@@ -44,18 +46,14 @@ export class ListAllComponent implements OnInit, AfterViewInit {
   }
  
   ngOnInit(): void {
-     
-   
+
+
     this.delegateCategoria.getAllEquipoUseCaseProvider
       .useFactory(this.equipoService)
       .execute(); // Le agrego los valores a el Emisor
 
     this.data$ = this.delegateCategoria.getAllEquipoUseCaseProvider
       .useFactory(this.equipoService).getAllEquipoObservable(); // Obtengo el valor nuevo de lo que alguien emitio
-   
+
   }
-  
- 
-
-
 }

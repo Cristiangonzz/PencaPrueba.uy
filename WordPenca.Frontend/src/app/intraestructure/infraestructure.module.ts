@@ -7,18 +7,15 @@ import { EquipoImplentationService } from './services/service-equipo/service-equ
 import { MatchService } from '../domain/services/MatchService ';
 import { matchUseCaseProviders } from './delegate/delegate-match/delegateMatch';
 
-
-
 @NgModule({
   declarations: [],
   imports: [CommonModule, HttpClientModule],
   providers: [
-    ...Object.values(equipoUseCaseProviders), 
-    ...Object.values(matchUseCaseProviders), 
-                     
-    { provide: EquipoService, useClass: EquipoImplentationService },
-    { provide: MatchService, useClass: EquipoImplentationService }
+    ...Object.values(equipoUseCaseProviders),
+    ...Object.values(matchUseCaseProviders),
 
-   ]
+    { provide: EquipoService, useClass: EquipoImplentationService },
+    { provide: MatchService, useClass: EquipoImplentationService },
+  ],
 })
-export class InfraestructureModule { }
+export class InfraestructureModule {}
