@@ -1,4 +1,6 @@
 ﻿using Microsoft.AspNetCore.SignalR;
+using MongoDB.Bson;
+using MongoDB.Driver;
 using WordPenca.Business.Domain;
 using WordPenca.Business.Repository.Interface;
 
@@ -7,9 +9,17 @@ namespace WordPenca.Api.Hubs
     public class MessageHub : Hub
     {
         private readonly IUnitOfWork _unitOfWork;
-        public MessageHub(IUnitOfWork unitOfWork)
+        private readonly IMongoCollection<Chat> _chatCollection;
+        private readonly IMongoCollection<ChatHistorial> _chatHistorialCollection;
+
+        private readonly IMongoCollection<ChatMensaje> _chatMensajesCollection;
+        public MessageHub(IUnitOfWork unitOfWork, IMongoClient mongoClient)
         {
             this._unitOfWork = unitOfWork;
+            var database = mongoClient.GetDatabase("TuPencaChat");
+            _chatCollection = database.GetCollection<Chat>("Chat");
+            _chatHistorialCollection = database.GetCollection<ChatHistorial>("ChatHistorial");
+            _chatMensajesCollection = database.GetCollection<ChatMensaje>("ChatMensaje");
         }
 
         public async Task JoinGroup(string userName, string chatId, string usuarioId)
@@ -31,27 +41,29 @@ namespace WordPenca.Api.Hubs
 
             try
             {
-                
+
                 ChatMensaje mensaje = new ChatMensaje
                 {
+
+                    Id = ObjectId.GenerateNewId().ToString(),
                     mensaje = $"{userName} entró al canal",
                     CreationDate = DateTime.Now,
-                    Usuario = await _unitOfWork.Usuario.GetFirstOrDefault(x => x.Id == Guid.Parse(usuarioId)),
+                    Usuario = usuarioId,
                     activo = false,
                     Description = "Entrada al canal"
                 };
 
-                mensaje.Usuario.Mensajes.Add(mensaje);//Le agregamos el mensaje al usuario
-                _unitOfWork.Usuario.Update(mensaje.Usuario);
 
-                
+
+                await _chatMensajesCollection.InsertOneAsync(mensaje);
+
                 //Respaldos en el historial
-                ChatHistorial historial = await this._unitOfWork.ChatHistorial.GetFirstOrDefault(x => x.chat.Id == Guid.Parse(chatId));
-                historial.UltimaActualizacion = DateTime.Now;
-                historial.Mensajes.Add(mensaje);
-                await this._unitOfWork.ChatHistorial.Update(historial);
+                var filterHistorial = Builders<ChatHistorial>.Filter.Eq(historial => historial.chat.Id, chatId);
+                var updateHistorial = Builders<ChatHistorial>.Update
+                .Push(historial => historial.Mensajes, mensaje)
+                .Set(historial => historial.UltimaActualizacion, DateTime.Now);
 
-                this._unitOfWork.Save();
+                await _chatHistorialCollection.UpdateOneAsync(filterHistorial, updateHistorial);
 
 
             }
@@ -81,22 +93,23 @@ namespace WordPenca.Api.Hubs
             {
                 ChatMensaje mensaje = new ChatMensaje
                 {
+                    Id = ObjectId.GenerateNewId().ToString(),
                     mensaje = $"{userName} salió del canal",
                     CreationDate = DateTime.Now,
-                    Usuario = await this._unitOfWork.Usuario.GetFirstOrDefault(x => x.Id == Guid.Parse(usuarioId)),
+                    Usuario = usuarioId,
                     activo = false,
                     Description = "Salida del canal"
                 };
 
-                mensaje.Usuario.Mensajes.Add(mensaje);//Le agregamos el mensaje al usuario
-                _unitOfWork.Usuario.Update(mensaje.Usuario);
+                await _chatMensajesCollection.InsertOneAsync(mensaje);
 
                 //Respaldos en el historial
-                ChatHistorial historial = await this._unitOfWork.ChatHistorial.GetFirstOrDefault(x => x.chat.Id == Guid.Parse(chatId));
-                historial.UltimaActualizacion = DateTime.Now;
-                historial.Mensajes.Add(mensaje);
-                await this._unitOfWork.ChatHistorial.Update(historial);
-                this._unitOfWork.Save();
+                var filterHistorial = Builders<ChatHistorial>.Filter.Eq(historial => historial.chat.Id, chatId);
+                var updateHistorial = Builders<ChatHistorial>.Update
+                    .Push(historial => historial.Mensajes, mensaje)
+                    .Set(historial => historial.UltimaActualizacion, DateTime.Now);
+
+                await _chatHistorialCollection.UpdateOneAsync(filterHistorial, updateHistorial);
 
             }
             catch(Exception ex)
@@ -124,24 +137,25 @@ namespace WordPenca.Api.Hubs
 
                 ChatMensaje mensaje = new ChatMensaje
                 {
+                    Id = ObjectId.GenerateNewId().ToString(),
                     mensaje = $"{message.UserName} entró al canal",
                     CreationDate = DateTime.Now,
-                    Usuario = await _unitOfWork.Usuario.GetFirstOrDefault(x => x.Id == Guid.Parse(message.UsuarioId)),
+                    Usuario = message.UsuarioId,
                     activo = false,
                     Description = "Mensaje enviado"
                 };
 
-                mensaje.Usuario.Mensajes.Add(mensaje);//Le agregamos el mensaje al usuario
-                _unitOfWork.Usuario.Update(mensaje.Usuario);
 
+                // Insertar mensaje en la colección de mensajes
+                await _chatMensajesCollection.InsertOneAsync(mensaje);
 
+                // Actualizar historial del chat
+                var filterHistorial = Builders<ChatHistorial>.Filter.Eq(historial => historial.chat.Id, message.ChatId);
+                var updateHistorial = Builders<ChatHistorial>.Update
+                    .Push(historial => historial.Mensajes, mensaje)
+                    .Set(historial => historial.UltimaActualizacion, DateTime.Now);
 
-                //Respaldos en el historial
-                ChatHistorial historial = await _unitOfWork.ChatHistorial.GetFirstOrDefault(x => x.chat.Id == Guid.Parse(message.ChatId));
-                historial.UltimaActualizacion = DateTime.Now;
-                historial.Mensajes.Add(mensaje);
-                await this._unitOfWork.ChatHistorial.Update(historial);
-                this._unitOfWork.Save();
+                await _chatHistorialCollection.UpdateOneAsync(filterHistorial, updateHistorial);
 
             }
             catch (Exception ex)

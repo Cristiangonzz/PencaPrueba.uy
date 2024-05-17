@@ -6,6 +6,8 @@ using Microsoft.AspNetCore.SignalR;
 using WordPenca.Api.Hubs;
 using WordPenca.Business.Repository.Interface;
 using System;
+using MongoDB.Driver;
+using MongoDB.Bson;
 
 
 namespace WordPenca.Api.Controllers
@@ -19,34 +21,48 @@ namespace WordPenca.Api.Controllers
         private readonly IUnitOfWork _unitOfWork;
 
         private readonly IMapper _mapper;
+        private readonly IMongoCollection<Chat> _chatCollection;
+        private readonly IMongoCollection<ChatHistorial> _chatHistorialCollection;
+
+        private readonly IMongoCollection<ChatMensaje> _chatMensajesCollection;
 
 
 
-        public ChatController(IHttpClientFactory httpClientFactory, IUnitOfWork unitOfWork, IMapper mapper)
+        public ChatController(IMongoClient mongoClient, IUnitOfWork unitOfWork, IMapper mapper)
         {
+            var database = mongoClient.GetDatabase("TuPencaChat");
+            _chatCollection = database.GetCollection<Chat>("Chat");
+            _chatHistorialCollection = database.GetCollection<ChatHistorial>("ChatHistorial");
+            _chatMensajesCollection = database.GetCollection<ChatMensaje>("ChatMensaje");
+
             this._unitOfWork = unitOfWork;
             this._mapper = mapper;
 
         }
 
         [HttpPost]
-        [Route("CrearChat")]
-        public async Task<IActionResult> CreateChat([FromBody] ChatDTO request)
+        [Route("CrearChat/{idUser}")]
+        public async Task<IActionResult> CreateChat([FromBody] ChatDTO request, [FromRoute] string idUser)
         {
             ResponseDTO<ChatDTO> _ResponseDTO = new ResponseDTO<ChatDTO>();
             try
             {
 
-                Chat chat = _mapper.Map<Chat>(request);
+                Chat chat = new Chat();
+                chat.Id = ObjectId.GenerateNewId().ToString();
+                chat.Name = request.Name;
+                chat.Description = request.Description;
+                chat.Usuarios.Add(idUser);
+
+                await _chatCollection.InsertOneAsync(chat);
 
                 ChatHistorial chatHistorial = new ChatHistorial();
+                chatHistorial.Id = ObjectId.GenerateNewId().ToString();
                 chatHistorial.chat = chat;
                 chatHistorial.UltimaActualizacion = DateTime.Now;
+                await _chatHistorialCollection.InsertOneAsync(chatHistorial);
 
-                chat = await this._unitOfWork.Chat.Add(chat);
-                chatHistorial = await this._unitOfWork.ChatHistorial.Add(chatHistorial);
-                this._unitOfWork.Save();
-                
+
 
                 _ResponseDTO = new ResponseDTO<ChatDTO>() { status = true, msg = "ok", value = _mapper.Map<ChatDTO>(chat) };
 
@@ -62,20 +78,21 @@ namespace WordPenca.Api.Controllers
 
 
         [HttpGet]
-        public async Task<IActionResult> ListGetAll(Guid userId)
+        [Route("getChat/{idUser}")]
+        public async Task<IActionResult> ListGetAll([FromRoute] string idUser)
         {
 
             ResponseDTO<List<ChatDTO>> _ResponseDTO = new ResponseDTO<List<ChatDTO>>();
 
             try
             {
-                List<ChatDTO> listaChat = new List<ChatDTO>();
+
+                var filter = Builders<Chat>.Filter.AnyEq(chat => chat.Usuarios, idUser);
+                var chats = await _chatCollection.Find(filter).ToListAsync();
+
+                List<ChatDTO> listaChat = chats.Select(chat => _mapper.Map<ChatDTO>(chat)).ToList();
 
 
-                IEnumerable<Chat> chats = await this._unitOfWork.Chat.GetAll(chat => chat.Usuarios.Any(u => u.Id == userId), includeProperties: "Usuarios");
-
-
-                listaChat = _mapper.Map<List<ChatDTO>>(chats.ToList());
 
                 if (listaChat.Count > 0)
                     _ResponseDTO = new ResponseDTO<List<ChatDTO>>() { status = true, msg = "ok", value = listaChat };
