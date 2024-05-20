@@ -9,6 +9,7 @@ using System;
 using MongoDB.Driver;
 using MongoDB.Bson;
 using WordPenca.Business.Service;
+using Microsoft.AspNetCore.Identity.Data;
 
 
 namespace WordPenca.Api.Controllers
@@ -68,7 +69,7 @@ namespace WordPenca.Api.Controllers
                     chat.Name = request.Name;
                 }
 
-                await this._chatUsuarioService.AgregarChatAUsuario(request.usuarioCreadorId, chat.Id);
+                await this._chatUsuarioService.AgregarChatAUsuario(request.usuarioCreadorId, chat.Id);//Este chat nuevo se lo agrego al usuario
 
                 Chat chatCreado = await _chatService.CreateChat(chat);
 
@@ -80,10 +81,12 @@ namespace WordPenca.Api.Controllers
                     UltimaActualizacion = DateTime.UtcNow
                 };
                 ChatHistorial historialCreado = await this._chatHistorialService.CreateChatHistorial(chatHistorial);
+                chatCreado.Historial = historialCreado;
+
+                await _chatService.UpdateChat(chatCreado.Id,chatCreado);
 
 
-
-                _ResponseDTO = new ResponseDTO<Chat>() { status = true, msg = "ok", value = chat };
+                _ResponseDTO = new ResponseDTO<Chat>() { status = true, msg = "ok", value = chatCreado };
 
                 return StatusCode(StatusCodes.Status200OK, _ResponseDTO);
             }
@@ -101,16 +104,6 @@ namespace WordPenca.Api.Controllers
             ResponseDTO<ChatMensaje> _ResponseDTO = new ResponseDTO<ChatMensaje>();
             try
             {
-                if (request == null)
-                {
-                    throw new ArgumentNullException(nameof(request), "Request body is null");
-                }
-
-                if (string.IsNullOrWhiteSpace(request.chatId))
-                {
-                    throw new ArgumentNullException(nameof(request.chatId), "Chat ID is null or empty");
-                }
-
                 ChatMensaje chatMensaje = new ChatMensaje
                 {
                     Id = ObjectId.GenerateNewId().ToString(),
@@ -279,6 +272,7 @@ namespace WordPenca.Api.Controllers
 
                 if (listChats.Count > 0)
                     _ResponseDTO = new ResponseDTO<List<Chat>>() { status = true, msg = "ok", value = listChats };
+                    
                 else
                     _ResponseDTO = new ResponseDTO<List<Chat>>() { status = false, msg = "Lista Vacia", value = null };
 
