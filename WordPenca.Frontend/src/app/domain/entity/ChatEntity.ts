@@ -4,28 +4,29 @@ import { IChatUsuarioDomain } from '../interfaces/chat/IChatUsuarioDomain';
 
 export class ChatDomainEntity implements IChatDomain {
   id: string;
-  nombre?: string | undefined;
+  name?: string | undefined;
   privado: boolean;
-  historial: IChatHistorialDomain;
+  historial?: IChatHistorialDomain | null;
   description?: string | undefined;
-  usuario: IChatUsuarioDomain[];
+  usuarios: IChatUsuarioDomain[];
   creationDate?: string | Date | null | undefined;
+
 
   constructor(
     privado: boolean,
     historial: IChatHistorialDomain,
-    usuario: IChatUsuarioDomain[],
+    usuarios: IChatUsuarioDomain[],
     id: string,
-    nombre?: string,
+    name?: string,
     description?: string,
     creationDate?: string | Date | null
   ) {
-    this.id = id as string;
-    this.nombre = nombre as string;
-    this.description = description as string;
-    this.privado = privado as boolean;
-    this.historial = historial as IChatHistorialDomain;
-    this.usuario = usuario as IChatUsuarioDomain[];
-    this.creationDate = creationDate as string | Date | null;
+    this.id = id ;
+    this.name = name ;
+    this.description = description ;
+    this.privado = privado;
+    this.historial = historial as IChatHistorialDomain | null;
+    this.usuarios = usuarios as IChatUsuarioDomain[];
+    this.creationDate = creationDate as  Date | null;
   }
 }

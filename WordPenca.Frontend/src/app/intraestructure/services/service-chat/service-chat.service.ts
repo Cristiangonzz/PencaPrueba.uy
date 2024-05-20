@@ -3,32 +3,32 @@ import { Injectable } from '@angular/core';
 import { Observable, map } from 'rxjs';
 import { ResponseDomainEntity } from '../../../domain/entity/ResponseEntity';
 import { ChatService } from '../../../domain/services/ChatService';
-import { ChatDomainEntity } from '../../../domain/entity/ChatEntity';
 import { CreateChatDto } from '../../dto/create/CreateChatDTO';
 import { UpdateChatDto } from '../../dto/update/updateChatDTO';
 import { ChatHistorialDomainEntity } from '../../../domain/entity/ChatHistorialEntity';
-import { ChatUsuarioDomainEntity } from '../../../domain/entity/ChatUsuarioEntity';
+import { IChatDomain } from '../../../domain/interfaces/chat/IChatDomain';
+import { IChatUsuarioDomain } from '../../../domain/interfaces/chat/IChatUsuarioDomain';
 
 @Injectable({
   providedIn: 'root',
 })
 export class chatImplentationService extends ChatService {
-  URL = 'http://localhost:5118';
+  URL = 'http://localhost:5000';
 
   constructor(private http: HttpClient) {
     super();
   }
 
-  getAll(): Observable<ResponseDomainEntity<ChatDomainEntity[]>> {
-    return this.http.get<ResponseDomainEntity<ChatDomainEntity[]>>(
+  getAll(): Observable<ResponseDomainEntity<IChatDomain[]>> {
+    return this.http.get<ResponseDomainEntity<IChatDomain[]>>(
       `${this.URL}/chat/getAllChats`
     );
   }
 
   create(
     data: CreateChatDto
-  ): Observable<ResponseDomainEntity<ChatDomainEntity>> {
-    return this.http.post<ResponseDomainEntity<ChatDomainEntity>>(
+  ): Observable<ResponseDomainEntity<IChatDomain>> {
+    return this.http.post<ResponseDomainEntity<IChatDomain>>(
       `${this.URL}/chat/CrearChat`,
       data
     );
@@ -45,36 +45,36 @@ export class chatImplentationService extends ChatService {
   update(
     id: string,
     entity: UpdateChatDto
-  ): Observable<ResponseDomainEntity<ChatDomainEntity>> {
+  ): Observable<ResponseDomainEntity<IChatDomain>> {
     throw new Error('Method not implemented.');
   }
   delete(id: string): Observable<boolean> {
     throw new Error('Method not implemented.');
   }
-  get(id: string): Observable<ResponseDomainEntity<ChatDomainEntity>> {
-    return this.http.get<ResponseDomainEntity<ChatDomainEntity>>(
+  get(id: string): Observable<ResponseDomainEntity<IChatDomain>> {
+    return this.http.get<ResponseDomainEntity<IChatDomain>>(
       `${this.URL}/chat/obtenerChat/${id}`
     );
   }
 
   getAllChatUsuarios(): Observable<
-    ResponseDomainEntity<ChatUsuarioDomainEntity[]>
+    ResponseDomainEntity<IChatUsuarioDomain[]>
   > {
-    return this.http.get<ResponseDomainEntity<ChatUsuarioDomainEntity[]>>(
+    return this.http.get<ResponseDomainEntity<IChatUsuarioDomain[]>>(
       `${this.URL}/chat/getAllChatUsuarios`
     );
   }
   getOneChatUsuario(
     id: string
-  ): Observable<ResponseDomainEntity<ChatUsuarioDomainEntity>> {
-    return this.http.get<ResponseDomainEntity<ChatUsuarioDomainEntity>>(
+  ): Observable<ResponseDomainEntity<IChatUsuarioDomain>> {
+    return this.http.get<ResponseDomainEntity<IChatUsuarioDomain>>(
       `${this.URL}/chat/obtenerUsuario/${id}`
     );
   }
 
   getByName(
     titulo: string
-  ): Observable<ResponseDomainEntity<ChatDomainEntity>> {
+  ): Observable<ResponseDomainEntity<IChatDomain>> {
     throw new Error('Method not implemented.');
   }
 }

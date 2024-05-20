@@ -28,7 +28,7 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewChecked {
   //delegateCategoria = chatUseCaseProviders;
   chat!: ChatDomainEntity;
   chatHistorial!: ChatHistorialDomainEntity;
-  chatMensajes!: ChatMensajeDomainEntity[];
+  chatMensajes: ChatMensajeDomainEntity[] = [];
   delegateChat = chatUseCaseProviders;
   delegateChatmensaje = chatMensajeUseCaseProviders;
   public chatId = '';
@@ -56,20 +56,20 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewChecked {
     this.getChat();
     this.chatHubService.canalMesaggeEmmit$
       .pipe(
-        // Usa el operador map para transformar cada ReciboMessage a IChatMensajeDomain
         map((conversation: ReciboMessage[]) => {
-          return conversation.map((msg: ReciboMessage) => {
+          console.log("La conversacion" + conversation) 
+          return conversation?.map((msg: ReciboMessage) => {
             return {
               mensaje: msg.message,
-              activo: true, // o cualquier valor booleano que desees por defecto
+              activo: true,
               usuario: msg.userName,
             } as IChatMensajeDomain;
-          });
+          }) || [];
         })
       )
       .subscribe((mensajesTranformado: IChatMensajeDomain[]) => {
-        // Guarda la conversación transformada
         this.chatMensajes = [...this.chatMensajes, ...mensajesTranformado];
+        console.log("mensajes" + JSON.stringify(this.chatMensajes) )
       });
   }
 
@@ -81,19 +81,36 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewChecked {
     }
   }
 
+
+  getHistorial(){
+    this.delegateChat.getChatHistorialUseCaseProvider
+      .useFactory(this.chatServicio).execute(this.chatId)
+      .subscribe({
+        next: (value: ResponseDomainEntity<ChatHistorialDomainEntity>) => {
+
+          this.chatHistorial = value.value!;
+          this.chatMensajes = value.value?.chatMensaje || [];
+          console.log("mensajes" + JSON.stringify(this.chatMensajes) );
+        },
+        error: () => {
+          this.sweet.toFire('Historial', 'Error al Obtener Chat Historial', 'error');
+        },
+      });
+  }
   getChat() {
+    this.chatId = this.activatedRoute.snapshot.params['id'];
+    
     //this.activatedRoute.snapshot.paramMap.get('chatId') || ''; otra opcion
     this.delegateChat.getChatUseCaseProvider
       .useFactory(this.chatServicio)
-      .execute((this.chatId = this.activatedRoute.snapshot.params['id']))
+      .execute(this.chatId)
       .subscribe({
         next: (value: ResponseDomainEntity<ChatDomainEntity>) => {
           this.chat = value.value!;
-          this.chatHistorial = value.value!.historial;
-          this.chatMensajes = value.value!.historial.chatMensaje;
+          this.getHistorial();
         },
         error: () => {
-          this.sweet.toFire('Curso', 'Error al Obtener Chat', 'error');
+          this.sweet.toFire('Chat', 'Error al Obtener Chat', 'error');
         },
       });
   }

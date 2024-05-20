@@ -1,10 +1,9 @@
 import { AfterViewInit, Component, OnDestroy, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { chatUseCaseProviders } from '../../../intraestructure/delegate/delegate-chat/delegateChat';
 import { ChatUsuarioDomainEntity } from '../../../domain/entity/ChatUsuarioEntity';
 import { chatMensajeUseCaseProviders } from '../../../intraestructure/delegate/delegate-chat-mensaje/delegateChatMensaje';
 import { Router } from '@angular/router';
-import { Subject, Subscription, takeUntil } from 'rxjs';
+import { Subject } from 'rxjs';
 import { SweetAlert } from '../../share/sweetAlert/sweet-alert.presentation';
 import { ChatService } from '../../../domain/services/ChatService';
 import { CreateChatDto } from '../../../intraestructure/dto/create/CreateChatDTO';
@@ -47,7 +46,7 @@ export class IndexComponent implements OnInit, OnDestroy, AfterViewInit {
       .subscribe({
         next: (value: ChatUsuarioDomainEntity[]) => {
           this.usuarios = value;
-          console.log('usuarios : ' + this.usuarios);
+          console.log('usuarios : ' + JSON.stringify(this.usuarios, null, 2));
         },
         error: () => {
           this.sweet.toFire('usuarios', 'Error al Obtener Curso', 'error');
@@ -65,7 +64,7 @@ export class IndexComponent implements OnInit, OnDestroy, AfterViewInit {
       .subscribe({
         next: (value: ChatDomainEntity[]) => {
           this.chats = value;
-          console.log('chats : ' + this.chats);
+          console.log('chats : ' + JSON.stringify(this.chats, null, 2));
         },
         error: () => {
           this.sweet.toFire('chats', 'Error al Obtener los Chat', 'error');

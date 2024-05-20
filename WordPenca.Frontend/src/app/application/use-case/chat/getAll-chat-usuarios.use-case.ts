@@ -1,6 +1,5 @@
 import { BehaviorSubject, asyncScheduler } from 'rxjs';
 import { Injectable } from '@angular/core';
-import { ChatDomainEntity } from '../../../domain/entity/ChatEntity';
 import { ChatService } from '../../../domain/services/ChatService';
 import { ResponseDomainEntity } from '../../../domain/entity/ResponseEntity';
 import { ChatUsuarioDomainEntity } from '../../../domain/entity/ChatUsuarioEntity';
@@ -20,10 +19,10 @@ export class GetAllChatUsuariosUseCase {
   execute = () => {
     if (this.statusEmmit.observed && !this.statusEmmit.closed) {
       this.chatService.getAllChatUsuarios().subscribe({
-        next: (value: ResponseDomainEntity<ChatUsuarioDomainEntity[]>) => {
+        next: (value: ResponseDomainEntity<IChatUsuarioDomain[]>) => {
           this.status = value.value!;
           console.
-            log('status : ' + value);
+            log('Caso de uso Usuario : ' + value.value!);
         },
         complete: () => {
           this.statusEmmit.next(this.status);

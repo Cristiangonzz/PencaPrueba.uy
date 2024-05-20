@@ -6,14 +6,12 @@
         <th>Sr</th>
         <th scope="col">Id</th>
         <th scope="col">Nombre</th>
-        <th scope="col">ChatId</th>
       </tr>
     </thead>
     <tbody>
       <tr *ngFor="let user of usuarios; let srNo  = index">
         <td>{{ user.id }}</td>
-        <td>{{ user.nombre }}</td>
-        <td>{{ user.chat }}</td>
+        <td>{{ user.name }}</td>
       </tr>
     </tbody>
   </table>
@@ -29,16 +27,15 @@
     </thead>
     <tbody>
       <tr *ngFor="let chat of chats; let srNo  = index">
+        <td>{{ srNo + 1 }}</td>
         <td>{{ chat.id }}</td>
-        <td>{{ chat.usuario[0].nombre }}</td>
-        <td>{{ chat.usuario[1].nombre}}</td>
+        <td>{{ chat.usuarios[0].name }}</td>
+        <td>{{ chat.usuarios[1].name }}</td>
         
         <td>
-          <div class="btn-group" role="group">
-            <ul class="dropdown-menu" aria-labelledby="btnGroupDrop1">
-              <li><a type="submit" class="dropdown-item" (click)="irChat(chat.id)">Chat</a></li>
-            </ul>
-          </div>
+          
+            <button type="button" class="btn btn-primary" (click)="irChat(chat.id)">Chat</button>
+          
         </td>
       </tr>
     </tbody>

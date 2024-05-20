@@ -3,7 +3,7 @@ import { IChatHistorialDomain } from '../interfaces/chat/IChatHistorialDomain';
 import { IChatMensajeDomain } from '../interfaces/chat/IChatMensajeDomain';
 
 export class ChatHistorialDomainEntity implements IChatHistorialDomain {
-  id?: string | undefined;
+  id: string;
   chat: IChatDomain;
   chatMensaje: IChatMensajeDomain[];
   creationDate?: string | Date | null | undefined;

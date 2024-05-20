@@ -2,32 +2,33 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { BaseService } from './BaseService';
 import { ResponseDomainEntity } from '../entity/ResponseEntity';
-import { ChatDomainEntity } from '../entity/ChatEntity';
 import { CreateChatDto } from '../../intraestructure/dto/create/CreateChatDTO';
 import { UpdateChatDto } from '../../intraestructure/dto/update/updateChatDTO';
 import { ChatHistorialDomainEntity } from '../entity/ChatHistorialEntity';
-import { ChatUsuarioDomainEntity } from '../entity/ChatUsuarioEntity';
+import { IChatDomain } from '../interfaces/chat/IChatDomain';
+import { IChatHistorialDomain } from '../interfaces/chat/IChatHistorialDomain';
+import { IChatUsuarioDomain } from '../interfaces/chat/IChatUsuarioDomain';
 
 @Injectable({
   providedIn: 'root',
 })
-export abstract class ChatService extends BaseService<ChatDomainEntity> {
+export abstract class ChatService extends BaseService<IChatDomain> {
   abstract create(
     data: CreateChatDto
-  ): Observable<ResponseDomainEntity<ChatDomainEntity>>;
+  ): Observable<ResponseDomainEntity<IChatDomain>>;
   abstract update(
     id: string,
     entity: UpdateChatDto
-  ): Observable<ResponseDomainEntity<ChatDomainEntity>>;
+  ): Observable<ResponseDomainEntity<IChatDomain>>;
 
   abstract getChatHistorial(
     idChat: string
   ): Observable<ResponseDomainEntity<ChatHistorialDomainEntity>>;
 
   abstract getAllChatUsuarios(): Observable<
-    ResponseDomainEntity<ChatUsuarioDomainEntity[]>
+    ResponseDomainEntity<IChatUsuarioDomain[]>
   >;
   abstract getOneChatUsuario(
     id: string
-  ): Observable<ResponseDomainEntity<ChatUsuarioDomainEntity>>;
+  ): Observable<ResponseDomainEntity<IChatUsuarioDomain>>;
 }
