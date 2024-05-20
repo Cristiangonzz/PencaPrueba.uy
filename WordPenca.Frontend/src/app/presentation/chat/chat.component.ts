@@ -6,8 +6,18 @@ import {
   OnInit,
   ViewChild,
 } from '@angular/core';
-import { ChatService } from '../../application/use-case/chat/chat-service.use-case';
-import { Subscription } from 'rxjs';
+import { ChatHubService } from '../../application/use-case/chat/chat-hub-service.use-case';
+import { map, Subscription } from 'rxjs';
+import { ActivatedRoute } from '@angular/router';
+import { chatMensajeUseCaseProviders } from '../../intraestructure/delegate/delegate-chat-mensaje/delegateChatMensaje';
+import { chatUseCaseProviders } from '../../intraestructure/delegate/delegate-chat/delegateChat';
+import { ChatDomainEntity } from '../../domain/entity/ChatEntity';
+import { ChatHistorialDomainEntity } from '../../domain/entity/ChatHistorialEntity';
+import { ChatService } from '../../domain/services/ChatService';
+import { SweetAlert } from '../share/sweetAlert/sweet-alert.presentation';
+import { ResponseDomainEntity } from '../../domain/entity/ResponseEntity';
+import { ChatMensajeDomainEntity } from '../../domain/entity/ChatMensajeEntity';
+import { IChatMensajeDomain } from '../../domain/interfaces/chat/IChatMensajeDomain';
 
 @Component({
   selector: 'app-chat',
@@ -16,16 +26,24 @@ import { Subscription } from 'rxjs';
 })
 export class ChatComponent implements OnInit, OnDestroy, AfterViewChecked {
   //delegateCategoria = chatUseCaseProviders;
-  public userName = '';
-  public groupName = ''; //Es solo para la vista de chat
+  chat!: ChatDomainEntity;
+  chatHistorial!: ChatHistorialDomainEntity;
+  chatMensajes!: ChatMensajeDomainEntity[];
+  delegateChat = chatUseCaseProviders;
+  delegateChatmensaje = chatMensajeUseCaseProviders;
   public chatId = '';
   public UsuarioId = '';
   public messageToSend = '';
-  public joined = false;
+  sweet = new SweetAlert();
   public conversation!: ReciboMessage[];
   private conversationSubscription: Subscription | undefined;
   @ViewChild('scrollMe') private scrollContainer!: ElementRef;
-  constructor(private chatService: ChatService) {}
+  constructor(
+    private chatHubService: ChatHubService,
+    private readonly activatedRoute: ActivatedRoute,
+    private chatServicio: ChatService
+  ) {}
+
   ngOnDestroy(): void {
     // Asegúrate de cancelar la suscripción para evitar posibles fugas de memoria
     if (this.conversationSubscription) {
@@ -34,45 +52,69 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewChecked {
   }
 
   ngOnInit(): void {
-    //this.chatService.conexionWebSocket();
-
-    this.chatService.canalMesaggeEmmit$.subscribe(
-      (conversation: ReciboMessage[]) => {
-        this.conversation = conversation;
-      }
-    );
-
-    // this.chatService.conexionUsuario.subscribe((estado: boolean) => {
-    //   this.joined = estado;
-    // });
+    //this.chatHubService.conexionWebSocket();
+    this.getChat();
+    this.chatHubService.canalMesaggeEmmit$
+      .pipe(
+        // Usa el operador map para transformar cada ReciboMessage a IChatMensajeDomain
+        map((conversation: ReciboMessage[]) => {
+          return conversation.map((msg: ReciboMessage) => {
+            return {
+              mensaje: msg.message,
+              activo: true, // o cualquier valor booleano que desees por defecto
+              usuario: msg.userName,
+            } as IChatMensajeDomain;
+          });
+        })
+      )
+      .subscribe((mensajesTranformado: IChatMensajeDomain[]) => {
+        // Guarda la conversación transformada
+        this.chatMensajes = [...this.chatMensajes, ...mensajesTranformado];
+      });
   }
 
   ngAfterViewChecked(): void {
     // Verifica si scrollContainer está definido y si su propiedad nativeElement está definida
     if (this.scrollContainer && this.scrollContainer.nativeElement) {
-      this.scrollContainer.nativeElement.scrollTop = this.scrollContainer.nativeElement.scrollHeight;
+      this.scrollContainer.nativeElement.scrollTop =
+        this.scrollContainer.nativeElement.scrollHeight;
     }
   }
 
+  getChat() {
+    //this.activatedRoute.snapshot.paramMap.get('chatId') || ''; otra opcion
+    this.delegateChat.getChatUseCaseProvider
+      .useFactory(this.chatServicio)
+      .execute((this.chatId = this.activatedRoute.snapshot.params['id']))
+      .subscribe({
+        next: (value: ResponseDomainEntity<ChatDomainEntity>) => {
+          this.chat = value.value!;
+          this.chatHistorial = value.value!.historial;
+          this.chatMensajes = value.value!.historial.chatMensaje;
+        },
+        error: () => {
+          this.sweet.toFire('Curso', 'Error al Obtener Chat', 'error');
+        },
+      });
+  }
+
   public join() {
-    this.chatService.join(this.userName, this.chatId, this.UsuarioId);
-    this.joined = true;
+    this.chatHubService.join(this.chatId, this.UsuarioId);
   }
 
   public sendMessage() {
     const newMessage: EnvioNewMessage = {
       message: this.messageToSend,
-      userName: this.userName,
       chatId: this.chatId,
       userId: this.UsuarioId,
     };
-    this.chatService.sendMessage(newMessage);
+    this.chatHubService.sendMessage(newMessage);
     this.messageToSend = '';
   }
 
   public leave() {
-    this.chatService
-      .leave(this.userName, this.groupName)
+    this.chatHubService
+      .leave(this.UsuarioId, this.chatId)
       .then(() => {
         setTimeout(() => {
           location.reload();
@@ -81,12 +123,10 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewChecked {
       .catch((err) => {
         console.log(err);
       });
-    this.joined = false;
   }
 }
 //(string? UserName, string Message, string? GroupName, Guid ChatId, Guid UserId);
 interface EnvioNewMessage {
-  userName: string;
   message: string;
   chatId: string;
   userId: string;
@@ -95,5 +135,4 @@ interface EnvioNewMessage {
 interface ReciboMessage {
   userName: string;
   message: string;
-  activo?: boolean;
 }

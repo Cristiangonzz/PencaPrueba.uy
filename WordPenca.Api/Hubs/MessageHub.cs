@@ -3,50 +3,48 @@ using MongoDB.Bson;
 using MongoDB.Driver;
 using WordPenca.Business.Domain;
 using WordPenca.Business.Repository.Interface;
+using WordPenca.Business.Service;
 
 namespace WordPenca.Api.Hubs
 {
     public class MessageHub : Hub
     {
-        private readonly IUnitOfWork _unitOfWork;
-        private readonly IMongoCollection<Chat> _chatCollection;
-        private readonly IMongoCollection<ChatHistorial> _chatHistorialCollection;
+        public ChatService _chatService;
+        public ChatHistorialService _chatHistorialService;
+        public ChatMensajeService _chatMensajeService;
+        public ChatUsuarioService _chatUsuarioService;
 
-        private readonly IMongoCollection<ChatMensaje> _chatMensajesCollection;
-        public MessageHub(IUnitOfWork unitOfWork, IMongoClient mongoClient)
+
+        public MessageHub(ChatUsuarioService chatUsuarioService, ChatService chatService, ChatHistorialService chatHistorialService, ChatMensajeService _chatMensajeService, IMongoClient mongoClient)
         {
-            this._unitOfWork = unitOfWork;
-            var database = mongoClient.GetDatabase("TuPencaChat");
-            _chatCollection = database.GetCollection<Chat>("Chat");
-            _chatHistorialCollection = database.GetCollection<ChatHistorial>("ChatHistorial");
-            _chatMensajesCollection = database.GetCollection<ChatMensaje>("ChatMensaje");
+            this._chatService = chatService;
+            this._chatHistorialService = chatHistorialService;
+            this._chatMensajeService = _chatMensajeService;
+            this._chatUsuarioService = chatUsuarioService;
+
         }
 
-        public async Task JoinGroup(string userName, string chatId, string usuarioId)
+        public async Task JoinGroup(string chatId, string usuarioId)
         {
-
+            //Falta recargar el histoprial cuando entre al chat
+          
             try
             {
                 await Groups.AddToGroupAsync(Context.ConnectionId, chatId);
-                await Clients.Group(chatId).SendAsync("NewUser", $"{userName} entró al canal");
-            }
-            catch (Exception ex)
-            {
-                // Manejo del error de formato de GUID
-                Console.WriteLine($"Error En enviar el mensaje: {ex.Message}");
-            }
+                await Clients.Group(chatId).SendAsync("NewUser", $"{usuarioId} entró al canal");
 
-
-
-
-            try
-            {
-
+                ///Agrego el chat a la lista que tiene el usuario
+                ChatUsuario chatUsuario = await this._chatUsuarioService.GetUsuarioByChat(chatId);
+                if (chatUsuario == null)
+                {
+                    bool agregarEstado = await this._chatUsuarioService.AgregarChatAUsuario(usuarioId, chatId);
+                }
+               
                 ChatMensaje mensaje = new ChatMensaje
                 {
 
                     Id = ObjectId.GenerateNewId().ToString(),
-                    mensaje = $"{userName} entró al canal",
+                    mensaje = $"{usuarioId} entró al canal",
                     CreationDate = DateTime.Now,
                     Usuario = usuarioId,
                     activo = false,
@@ -55,17 +53,15 @@ namespace WordPenca.Api.Hubs
 
 
 
-                await _chatMensajesCollection.InsertOneAsync(mensaje);
+                ChatMensaje chatMensajeCreado =  await _chatMensajeService.CreateChatMensaje(mensaje);
 
                 //Respaldos en el historial
-                var filterHistorial = Builders<ChatHistorial>.Filter.Eq(historial => historial.chat.Id, chatId);
-                var updateHistorial = Builders<ChatHistorial>.Update
-                .Push(historial => historial.Mensajes, mensaje)
-                .Set(historial => historial.UltimaActualizacion, DateTime.Now);
 
-                await _chatHistorialCollection.UpdateOneAsync(filterHistorial, updateHistorial);
-
-
+                ChatHistorial chatHistorial = await _chatHistorialService.GetChatHistorialByChat(chatId);
+                chatHistorial.Mensajes.Add(chatMensajeCreado);
+                chatHistorial.UltimaActualizacion = DateTime.Now;
+                bool estado = await _chatHistorialService.UpdateChatHistorial(chatHistorial.Id,chatHistorial);
+               
             }
             catch (Exception ex)
             {
@@ -74,43 +70,38 @@ namespace WordPenca.Api.Hubs
             
         }
 
-        public async Task LeaveGroup(string userName, string chatId, string usuarioId)
+        public async Task LeaveGroup(string chatId, string usuarioId)
         {
-
             try
             {
                 await Groups.RemoveFromGroupAsync(Context.ConnectionId, chatId);
-                await Clients.Group(chatId).SendAsync("NewUser", $"{userName} Salio del canal");
-            }
-            catch (Exception ex)
-            {
-                // Manejo del error de formato de GUID
-                Console.WriteLine($"Error En enviar el mensaje: {ex.Message}");
-            }
+                await Clients.Group(chatId).SendAsync("LeftUser", $"{usuarioId} Salio del canal");
 
-
-            try
-            {
                 ChatMensaje mensaje = new ChatMensaje
                 {
                     Id = ObjectId.GenerateNewId().ToString(),
-                    mensaje = $"{userName} salió del canal",
+                    mensaje = $"{usuarioId} salió del canal",
                     CreationDate = DateTime.Now,
                     Usuario = usuarioId,
                     activo = false,
                     Description = "Salida del canal"
                 };
 
-                await _chatMensajesCollection.InsertOneAsync(mensaje);
+                ChatMensaje mensajeCreado = await _chatMensajeService.CreateChatMensaje(mensaje);
 
                 //Respaldos en el historial
-                var filterHistorial = Builders<ChatHistorial>.Filter.Eq(historial => historial.chat.Id, chatId);
-                var updateHistorial = Builders<ChatHistorial>.Update
-                    .Push(historial => historial.Mensajes, mensaje)
-                    .Set(historial => historial.UltimaActualizacion, DateTime.Now);
-
-                await _chatHistorialCollection.UpdateOneAsync(filterHistorial, updateHistorial);
-
+                ChatHistorial chatHistorial = await _chatHistorialService.GetChatHistorialByChat(chatId);
+                chatHistorial.Mensajes.Add(mensajeCreado);
+                chatHistorial.UltimaActualizacion = DateTime.Now;
+                bool estado = await _chatHistorialService.UpdateChatHistorial(chatHistorial.Id, chatHistorial);
+                if (estado)
+                {
+                    Console.WriteLine("Se Actualizo el historial");
+                }
+                else
+                {
+                    Console.WriteLine("Error al actualizar el historial");
+                }
             }
             catch(Exception ex)
             {
@@ -123,22 +114,13 @@ namespace WordPenca.Api.Hubs
         {
             try
             {
-                EnviarMessage messageToSend = new EnviarMessage(message.UserName, message.Message);
+                EnviarMessage messageToSend = new EnviarMessage(message.UsuarioId, message.Message);
                 await Clients.Group(message.ChatId).SendAsync("NewMessage", messageToSend);
-            }
-            catch (Exception ex)
-            {
-                // Manejo del error de formato de GUID
-                Console.WriteLine($"Error En enviar el mensaje: {ex.Message}");
-            }
-
-            try
-            {
 
                 ChatMensaje mensaje = new ChatMensaje
                 {
                     Id = ObjectId.GenerateNewId().ToString(),
-                    mensaje = $"{message.UserName} entró al canal",
+                    mensaje = message.Message,
                     CreationDate = DateTime.Now,
                     Usuario = message.UsuarioId,
                     activo = false,
@@ -147,16 +129,23 @@ namespace WordPenca.Api.Hubs
 
 
                 // Insertar mensaje en la colección de mensajes
-                await _chatMensajesCollection.InsertOneAsync(mensaje);
+                ChatMensaje mensajeCreado = await _chatMensajeService.CreateChatMensaje(mensaje);
 
                 // Actualizar historial del chat
-                var filterHistorial = Builders<ChatHistorial>.Filter.Eq(historial => historial.chat.Id, message.ChatId);
-                var updateHistorial = Builders<ChatHistorial>.Update
-                    .Push(historial => historial.Mensajes, mensaje)
-                    .Set(historial => historial.UltimaActualizacion, DateTime.Now);
+                //Respaldos en el historial
 
-                await _chatHistorialCollection.UpdateOneAsync(filterHistorial, updateHistorial);
-
+                ChatHistorial chatHistorial = await _chatHistorialService.GetChatHistorialByChat(message.ChatId);
+                chatHistorial.Mensajes.Add(mensajeCreado);
+                chatHistorial.UltimaActualizacion = DateTime.Now;
+                bool estado = await _chatHistorialService.UpdateChatHistorial(chatHistorial.Id, chatHistorial);
+                if (estado)
+                {
+                    Console.WriteLine("Se Actualizo el historial");
+                }
+                else
+                {
+                    Console.WriteLine("Error al actualizar el historial");
+                }
             }
             catch (Exception ex)
             {
@@ -168,5 +157,5 @@ namespace WordPenca.Api.Hubs
         }
     }
 }
-public record NewMessage(string? UserName, string Message, string ChatId, string UsuarioId);
+public record NewMessage(string Message, string ChatId, string UsuarioId);
 public record EnviarMessage(string? UserName, string Message);

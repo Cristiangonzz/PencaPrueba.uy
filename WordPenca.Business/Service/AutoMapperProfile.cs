@@ -17,12 +17,10 @@ namespace WordPenca.Business.Domain
 
             CreateMap<ChatDTO, Chat>()
                 .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.Name))
-                .ForMember(dest => dest.Description, opt => opt.MapFrom(src => src.Description))
-                .ForMember(dest => dest.imagen, opt => opt.MapFrom(src => src.imagen));// Mapeo de ChatDTO a Chat
+                .ForMember(dest => dest.privado, opt => opt.MapFrom(src => src.Privado));// Mapeo de ChatDTO a Chat
             CreateMap<Chat, ChatDTO>()
                 .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.Name))
-                .ForMember(dest => dest.Description, opt => opt.MapFrom(src => src.Description))
-                .ForMember(dest => dest.imagen, opt => opt.MapFrom(src => src.imagen));// Mapeo de Chat a ChatDTO
+                .ForMember(dest => dest.Privado, opt => opt.MapFrom(src => src.privado));// Mapeo de Chat a ChatDTO
 
             CreateMap<UsuarioDTO, Usuario>()
                 .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.Name))

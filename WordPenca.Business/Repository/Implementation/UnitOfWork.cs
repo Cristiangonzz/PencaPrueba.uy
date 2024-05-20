@@ -14,11 +14,6 @@ namespace WordPenca.Business.Repository.Implementation
         public ITablaRepository Tabla { get; private set; }
         public IClasificacionRepository Clasificacion { get; private set; }
         public IUsuarioRepository Usuario { get; private set; }
-        public IChatRepository Chat { get; private set; }
-
-        public IChatMensajeRepository ChatMensaje { get; private set; }
-        public IChatHistorialRepository ChatHistorial { get; private set; }
-
 
         public UnitOfWork(ApplicationDbContext db)
         {
@@ -32,10 +27,6 @@ namespace WordPenca.Business.Repository.Implementation
             Clasificacion = new ClasificacionRepository(_db);
             Penca = new PencaRepository(_db);
             Usuario = new UsuarioRepository(_db);
-
-            Chat = new ChatRepository(_db);
-            ChatMensaje = new ChatMensajeRepository(_db);
-            ChatHistorial = new ChatHistorialRepository(_db);
 
         }
 

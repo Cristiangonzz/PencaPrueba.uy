@@ -10,14 +10,7 @@ namespace WordPenca.Business.Repository.Interface
         IEquipoRepository Equipo { get; }
         ITablaRepository Tabla { get; }
         IClasificacionRepository Clasificacion { get; }
-        IChatRepository Chat { get; }
         IUsuarioRepository Usuario { get; }
-
-
-        IChatMensajeRepository ChatMensaje { get; }
-
-        IChatHistorialRepository ChatHistorial { get; }
-
 
         void Save();
     }

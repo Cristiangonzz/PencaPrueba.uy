@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.SignalR;
 using WordPenca.Api.Hubs;
 using WordPenca.Business.Repository.Interface;
 using System;
+using WordPenca.Business.Service;
 
 
 namespace WordPenca.Api.Controllers
@@ -17,15 +18,16 @@ namespace WordPenca.Api.Controllers
     {
 
         private readonly IUnitOfWork _unitOfWork;
-
+        private readonly ChatUsuarioService _chatUsuarioService;
         private readonly IMapper _mapper;
 
 
 
-        public UsuarioController(IUnitOfWork unitOfWork, IMapper mapper)
+        public UsuarioController(ChatUsuarioService chatUsuarioService, IUnitOfWork unitOfWork, IMapper mapper)
         {
             this._unitOfWork = unitOfWork;
             this._mapper = mapper;
+            this._chatUsuarioService = chatUsuarioService;
 
         }
 
@@ -38,10 +40,18 @@ namespace WordPenca.Api.Controllers
             {
 
                 Usuario usuario = _mapper.Map<Usuario>(request);
-          
+                
                 usuario = await this._unitOfWork.Usuario.Add(usuario);
                 this._unitOfWork.Save();
 
+                //Creamos los mismos datos para mongo
+                ChatUsuario chatUsuario = new ChatUsuario
+                {
+                    Id = usuario.Id.ToString(),
+                    Name = usuario.Name,
+                    Chats = new List<string>()
+                };
+                await this._chatUsuarioService.CreateChatUsuario(chatUsuario);
                 _ResponseDTO = new ResponseDTO<UsuarioDTO>() { status = true, msg = "ok", value = _mapper.Map<UsuarioDTO>(usuario) };
 
                 return StatusCode(StatusCodes.Status200OK, _ResponseDTO);

@@ -8,6 +8,7 @@ using WordPenca.Business.Repository.Interface;
 using System;
 using MongoDB.Driver;
 using MongoDB.Bson;
+using WordPenca.Business.Service;
 
 
 namespace WordPenca.Api.Controllers
@@ -21,19 +22,18 @@ namespace WordPenca.Api.Controllers
         private readonly IUnitOfWork _unitOfWork;
 
         private readonly IMapper _mapper;
-        private readonly IMongoCollection<Chat> _chatCollection;
-        private readonly IMongoCollection<ChatHistorial> _chatHistorialCollection;
+        private readonly ChatService _chatService;
+        private readonly ChatHistorialService _chatHistorialService;
+        private readonly ChatMensajeService _chatMensajeService;
+        private readonly ChatUsuarioService _chatUsuarioService;
 
-        private readonly IMongoCollection<ChatMensaje> _chatMensajesCollection;
-
-
-
-        public ChatController(IMongoClient mongoClient, IUnitOfWork unitOfWork, IMapper mapper)
+        public ChatController(ChatUsuarioService chatUsuarioService, ChatService chatService, ChatHistorialService chatHistorialService, ChatMensajeService _chatMensajeService, IUnitOfWork unitOfWork, IMapper mapper)
         {
-            var database = mongoClient.GetDatabase("TuPencaChat");
-            _chatCollection = database.GetCollection<Chat>("Chat");
-            _chatHistorialCollection = database.GetCollection<ChatHistorial>("ChatHistorial");
-            _chatMensajesCollection = database.GetCollection<ChatMensaje>("ChatMensaje");
+            this._chatService = chatService;
+            this._chatHistorialService = chatHistorialService;
+            this._chatMensajeService = _chatMensajeService;
+            this._chatUsuarioService = chatUsuarioService;
+
 
             this._unitOfWork = unitOfWork;
             this._mapper = mapper;
@@ -41,44 +41,200 @@ namespace WordPenca.Api.Controllers
         }
 
         [HttpPost]
-        [Route("CrearChat/{idUser}")]
-        public async Task<IActionResult> CreateChat([FromBody] ChatDTO request, [FromRoute] string idUser)
+        [Route("CrearChat")]
+        public async Task<IActionResult> CreateChat([FromBody] ChatDTO request)
         {
-            ResponseDTO<ChatDTO> _ResponseDTO = new ResponseDTO<ChatDTO>();
+            ResponseDTO<Chat> _ResponseDTO = new ResponseDTO<Chat>();
             try
             {
+                ChatUsuario chatUsuario = await this._chatUsuarioService.GetUsuario(request.usuarioCreadorId);
+                Chat chat = new Chat
+                {
+                    Id = ObjectId.GenerateNewId().ToString(),
+                    privado = request.Privado,
+                    Usuarios = new List<ChatUsuario> { chatUsuario }
+                };
 
-                Chat chat = new Chat();
-                chat.Id = ObjectId.GenerateNewId().ToString();
-                chat.Name = request.Name;
-                chat.Description = request.Description;
-                chat.Usuarios.Add(idUser);
+                if (request.Privado && request.usuarioInvitadoId != null)
+                {
+                    ChatUsuario chatUsuarioInvitado = await this._chatUsuarioService.GetUsuario(request.usuarioInvitadoId);
+                    await this._chatUsuarioService.AgregarChatAUsuario(request.usuarioInvitadoId, chat.Id);
+                    chat.Usuarios.Add(chatUsuarioInvitado);
 
-                await _chatCollection.InsertOneAsync(chat);
+                }
+                else
+                {
+                    chat.Description = request.Description;
+                    chat.Name = request.Name;
+                }
 
-                ChatHistorial chatHistorial = new ChatHistorial();
-                chatHistorial.Id = ObjectId.GenerateNewId().ToString();
-                chatHistorial.chat = chat;
-                chatHistorial.UltimaActualizacion = DateTime.Now;
-                await _chatHistorialCollection.InsertOneAsync(chatHistorial);
+                await this._chatUsuarioService.AgregarChatAUsuario(request.usuarioCreadorId, chat.Id);
+
+                Chat chatCreado = await _chatService.CreateChat(chat);
+
+                ChatHistorial chatHistorial = new ChatHistorial
+                {
+                    Id = ObjectId.GenerateNewId().ToString(),
+                    chat = chatCreado,
+                    Mensajes = new List<ChatMensaje>(),
+                    UltimaActualizacion = DateTime.UtcNow
+                };
+                ChatHistorial historialCreado = await this._chatHistorialService.CreateChatHistorial(chatHistorial);
 
 
 
-                _ResponseDTO = new ResponseDTO<ChatDTO>() { status = true, msg = "ok", value = _mapper.Map<ChatDTO>(chat) };
+                _ResponseDTO = new ResponseDTO<Chat>() { status = true, msg = "ok", value = chat };
 
                 return StatusCode(StatusCodes.Status200OK, _ResponseDTO);
             }
             catch (Exception ex)
             {
-                _ResponseDTO = new ResponseDTO<ChatDTO>() { status = false, msg = "No se pudo crear el producto" + ex.Message };
+                _ResponseDTO = new ResponseDTO<Chat> { status = false, msg = "No se pudo crear el producto: " + ex.ToString() };
+                return StatusCode(StatusCodes.Status500InternalServerError, _ResponseDTO);
+            }
+
+        }
+        [HttpPost]
+        [Route("CrearMensaje")]
+        public async Task<IActionResult> CreateChatMensaje([FromBody] ChatMensajeDTO request)
+        {
+            ResponseDTO<ChatMensaje> _ResponseDTO = new ResponseDTO<ChatMensaje>();
+            try
+            {
+                if (request == null)
+                {
+                    throw new ArgumentNullException(nameof(request), "Request body is null");
+                }
+
+                if (string.IsNullOrWhiteSpace(request.chatId))
+                {
+                    throw new ArgumentNullException(nameof(request.chatId), "Chat ID is null or empty");
+                }
+
+                ChatMensaje chatMensaje = new ChatMensaje
+                {
+                    Id = ObjectId.GenerateNewId().ToString(),
+                    mensaje = request.mensaje!,
+                    Usuario = request.usuario!,
+                    activo = false,
+                    CreationDate = DateTime.UtcNow,
+
+                };
+
+                ChatMensaje chatMensajeCreado = await _chatMensajeService.CreateChatMensaje(chatMensaje);
+
+                try
+                {
+                    ChatHistorial chatHistorial = await this._chatHistorialService.GetChatHistorialByChat(request.chatId);
+                    Console.WriteLine("Historial encontrado id: " + chatHistorial.Id);
+                    chatHistorial.Mensajes.Add(chatMensajeCreado);
+                    bool updateado = await this._chatHistorialService.UpdateChatHistorial(chatHistorial.Id, chatHistorial);
+                    if (!updateado)
+                    {
+                        _ResponseDTO = new ResponseDTO<ChatMensaje> { status = false, msg = "El mensaje no se puedo guradar en el historial " };
+                        return StatusCode(StatusCodes.Status500InternalServerError, _ResponseDTO);
+                    }
+                    _ResponseDTO = new ResponseDTO<ChatMensaje>() { status = true, msg = "ok", value = chatMensajeCreado };
+
+                }
+                catch (Exception ex)
+                {
+
+                    _ResponseDTO = new ResponseDTO<ChatMensaje> { status = false, msg = "Fallo el agregar el mensaje al Historial ---- " + ex.ToString() };
+                    return StatusCode(StatusCodes.Status500InternalServerError, _ResponseDTO);
+                }
+
+
+
+                return StatusCode(StatusCodes.Status200OK, _ResponseDTO);
+            }
+            catch (Exception ex)
+            {
+                _ResponseDTO = new ResponseDTO<ChatMensaje> { status = false, msg = "No se pudo crear el producto: " + ex.ToString() };
                 return StatusCode(StatusCodes.Status500InternalServerError, _ResponseDTO);
             }
 
         }
 
+        [HttpGet]
+        [Route("obtenerChatHistorial/{idChatHistorial}")]
+        public async Task<IActionResult> ObtenerChatHistorial([FromRoute] string idChatHistorial)
+        {
+
+            ResponseDTO<ChatHistorial> _ResponseDTO = new ResponseDTO<ChatHistorial>();
+
+            try
+            {
+                ChatHistorial chatHistorials = await this._chatHistorialService.GetChatHistorial(idChatHistorial);
+
+                if (chatHistorials.Id != null)
+                    _ResponseDTO = new ResponseDTO<ChatHistorial>() { status = true, msg = "ok", value = chatHistorials };
+                else
+                    _ResponseDTO = new ResponseDTO<ChatHistorial>() { status = false, msg = "Lista Vacia", value = null };
+
+                return StatusCode(StatusCodes.Status200OK, _ResponseDTO);
+            }
+            catch (Exception ex)
+            {
+                _ResponseDTO = new ResponseDTO<ChatHistorial>() { status = false, msg = ex.Message, value = null };
+                return StatusCode(StatusCodes.Status500InternalServerError, _ResponseDTO);
+            }
+        }
 
         [HttpGet]
-        [Route("getChat/{idUser}")]
+        [Route("obtenerChat/{idChat}")]
+        public async Task<IActionResult> ObtenerChat([FromRoute] string idChat)
+        {
+
+            ResponseDTO<Chat> _ResponseDTO = new ResponseDTO<Chat>();
+
+            try
+            {
+                Chat chats = await this._chatService.GetChat(idChat);
+
+                if (chats.Id != null)
+                    _ResponseDTO = new ResponseDTO<Chat>() { status = true, msg = "ok", value = chats };
+                else
+                    _ResponseDTO = new ResponseDTO<Chat>() { status = false, msg = "Lista Vacia", value = null };
+
+                return StatusCode(StatusCodes.Status200OK, _ResponseDTO);
+            }
+            catch (Exception ex)
+            {
+                _ResponseDTO = new ResponseDTO<Chat>() { status = false, msg = ex.Message, value = null };
+                return StatusCode(StatusCodes.Status500InternalServerError, _ResponseDTO);
+            }
+        }
+
+        [HttpGet]
+        [Route("obtenerHistorialChat/{idChat}")]
+        public async Task<IActionResult> ObtenerHistorialChat([FromRoute] string idChat)
+        {
+
+            ResponseDTO<ChatHistorial> _ResponseDTO = new ResponseDTO<ChatHistorial>();
+
+            try
+            {
+                ChatHistorial historial = await this._chatHistorialService.GetChatHistorialByChat(idChat);
+
+
+                if (historial.Id != null)
+                    _ResponseDTO = new ResponseDTO<ChatHistorial>() { status = true, msg = "ok", value = historial };
+                else
+                    _ResponseDTO = new ResponseDTO<ChatHistorial>() { status = false, msg = "Lista Vacia", value = null };
+
+                return StatusCode(StatusCodes.Status200OK, _ResponseDTO);
+            }
+            catch (Exception ex)
+            {
+                _ResponseDTO = new ResponseDTO<ChatHistorial>() { status = false, msg = ex.Message, value = null };
+                return StatusCode(StatusCodes.Status500InternalServerError, _ResponseDTO);
+            }
+        }
+
+
+        [HttpGet]
+        [Route("obtenerChatUsuario/{idUser}")]
         public async Task<IActionResult> ListGetAll([FromRoute] string idUser)
         {
 
@@ -87,8 +243,7 @@ namespace WordPenca.Api.Controllers
             try
             {
 
-                var filter = Builders<Chat>.Filter.AnyEq(chat => chat.Usuarios, idUser);
-                var chats = await _chatCollection.Find(filter).ToListAsync();
+                var chats = await this._chatService.GetChatUser(idUser);
 
                 List<ChatDTO> listaChat = chats.Select(chat => _mapper.Map<ChatDTO>(chat)).ToList();
 
@@ -104,6 +259,92 @@ namespace WordPenca.Api.Controllers
             catch (Exception ex)
             {
                 _ResponseDTO = new ResponseDTO<List<ChatDTO>>() { status = false, msg = ex.Message, value = null };
+                return StatusCode(StatusCodes.Status500InternalServerError, _ResponseDTO);
+            }
+        }
+
+        [HttpGet]
+        [Route("getAllChats")]
+        public async Task<IActionResult> ListGetAllChat()
+        {
+
+            ResponseDTO<List<Chat>> _ResponseDTO = new ResponseDTO<List<Chat>>();
+
+            try
+            {
+
+                List<Chat> listChats = await this._chatService.GetChats();
+
+
+
+                if (listChats.Count > 0)
+                    _ResponseDTO = new ResponseDTO<List<Chat>>() { status = true, msg = "ok", value = listChats };
+                else
+                    _ResponseDTO = new ResponseDTO<List<Chat>>() { status = false, msg = "Lista Vacia", value = null };
+
+                return StatusCode(StatusCodes.Status200OK, _ResponseDTO);
+            }
+            catch (Exception ex)
+            {
+                _ResponseDTO = new ResponseDTO<List<Chat>>() { status = false, msg = ex.Message, value = null };
+                return StatusCode(StatusCodes.Status500InternalServerError, _ResponseDTO);
+            }
+        }
+
+
+        [HttpGet]
+        [Route("getAllChatUsuarios")]
+        public async Task<IActionResult> ListGetAllChatUsuarios()
+        {
+
+            ResponseDTO<List<ChatUsuario>> _ResponseDTO = new ResponseDTO<List<ChatUsuario>>();
+
+            try
+            {
+
+                List<ChatUsuario> listChatUsuarios = await this._chatUsuarioService.GetUsuarios();
+
+
+
+                if (listChatUsuarios.Count > 0)
+                    _ResponseDTO = new ResponseDTO<List<ChatUsuario>>() { status = true, msg = "ok", value = listChatUsuarios };
+                else
+                    _ResponseDTO = new ResponseDTO<List<ChatUsuario>>() { status = false, msg = "Lista Vacia", value = null };
+
+                return StatusCode(StatusCodes.Status200OK, _ResponseDTO);
+            }
+            catch (Exception ex)
+            {
+                _ResponseDTO = new ResponseDTO<List<ChatUsuario>>() { status = false, msg = ex.Message, value = null };
+                return StatusCode(StatusCodes.Status500InternalServerError, _ResponseDTO);
+            }
+        }
+
+
+        [HttpGet]
+        [Route("obtenerUsuario/{idUser}")]
+        public async Task<IActionResult> GetUsuario([FromRoute] string idUser)
+        {
+
+            ResponseDTO<ChatUsuario> _ResponseDTO = new ResponseDTO<ChatUsuario>();
+
+            try
+            {
+
+                ChatUsuario usuario = await this._chatUsuarioService.GetUsuario(idUser);
+
+
+
+                if (usuario != null)
+                    _ResponseDTO = new ResponseDTO<ChatUsuario>() { status = true, msg = "ok", value = usuario };
+                else
+                    _ResponseDTO = new ResponseDTO<ChatUsuario>() { status = false, msg = "Lista Vacia", value = null };
+
+                return StatusCode(StatusCodes.Status200OK, _ResponseDTO);
+            }
+            catch (Exception ex)
+            {
+                _ResponseDTO = new ResponseDTO<ChatUsuario>() { status = false, msg = ex.Message, value = null };
                 return StatusCode(StatusCodes.Status500InternalServerError, _ResponseDTO);
             }
         }

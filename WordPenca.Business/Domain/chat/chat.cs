@@ -12,8 +12,8 @@ namespace WordPenca.Business.Domain
         public string? Name { get; set; }
         public string? imagen { get; set; }
         public string? Description { get; set; }
-        public ChatHistorial Historial { get; set; } = null!;
-        public List<string> Usuarios { get; set; } = null!;//Por correos
+        public ChatHistorial Historial { get; set; }
+        public List<ChatUsuario> Usuarios { get; set; } = null!;//Por correos
         public bool privado { get; set; }
         public DateTime CreationDate { get; set; }
 

@@ -12,7 +12,7 @@ namespace WordPenca.Business.Domain
         public string? URLFotoPerfil { get; set; }
         public string? Role { get; set; }
         public DateTime CreationDate { get; set; }
-        public List<Chat>? Chat { get; set; }
+        public List<string>? Chat { get; set; }
 
     }
 }

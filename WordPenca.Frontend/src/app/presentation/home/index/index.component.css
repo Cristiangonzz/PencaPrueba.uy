@@ -1,0 +1,13 @@
+i {
+    color: #0747a6;
+    font-size: 20px;
+  }
+  .form-control {
+    border: 2px solid #347fca !important;
+  }
+  .content-container {
+    padding-top: 60px; /* Ajusta el valor según la altura de tu navbar */
+    padding-bottom: 60px; /* Ajusta el valor según la altura de tu footer */
+    text-align: center;
+    overflow: auto;
+  }

@@ -4,7 +4,7 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { HttpClientModule } from '@angular/common/http';
 import { RoutingChatModule } from './routing-chat.module';
 import { ChatComponent } from './chat.component';
-import { ChatService } from '../../application/use-case/chat/chat-service.use-case';
+import { ChatHubService } from '../../application/use-case/chat/chat-hub-service.use-case';
 
 @NgModule({
   declarations: [ChatComponent],
@@ -15,7 +15,7 @@ import { ChatService } from '../../application/use-case/chat/chat-service.use-ca
     HttpClientModule,
     FormsModule,
   ],
-  providers: [ChatService],
+  providers: [ChatHubService],
   exports: [ChatComponent],
 })
 export class ChatModule {}

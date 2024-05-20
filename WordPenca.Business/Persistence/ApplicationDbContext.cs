@@ -9,9 +9,13 @@ namespace WordPenca.Business.Persistence
 
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
         {
-
+            
         }
-      
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
+        }
         public DbSet<Equipo> Equipos { get; set; }
 
         public DbSet<Partido> Partidos { get; set; }

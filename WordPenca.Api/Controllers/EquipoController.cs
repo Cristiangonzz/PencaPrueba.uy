@@ -49,7 +49,7 @@ namespace WordPenca.Api.Controllers
             string chatId = "";
             string usuarioId = "";
 
-            NewMessage message = new NewMessage("Sistema", "Api de Match", chatId, usuarioId);
+            NewMessage message = new NewMessage("Api de Match", chatId, usuarioId);
             using (var response = await client.SendAsync(request))
             {
                 response.EnsureSuccessStatusCode();

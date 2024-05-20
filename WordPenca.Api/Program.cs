@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 using MongoDB.Driver;
 using WordPenca.Api.Hubs;
@@ -6,6 +7,7 @@ using WordPenca.Business.Domain;
 using WordPenca.Business.Persistence;
 using WordPenca.Business.Repository.Implementation;
 using WordPenca.Business.Repository.Interface;
+using WordPenca.Business.Service;
 
 
 
@@ -22,23 +24,25 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddAutoMapper(typeof(AutoMapperProfile));
 
 // Configure MongoDB settings
-builder.Services.Configure<MongoDbSettings>(builder.Configuration.GetSection("MongoDB"));
+builder.Services.Configure<MongoDbSettings>(builder.Configuration.GetSection(nameof(MongoDbSettings)));
 
+// Register IMongoClient using the connection string from configuration
 builder.Services.AddSingleton<IMongoClient>(sp =>
 {
-    var config = sp.GetRequiredService<IOptions<MongoDbSettings>>().Value;
-
-    if (string.IsNullOrEmpty(config.ConnectionString))
-    {
-        throw new ArgumentNullException(nameof(config.ConnectionString), "La cadena de conexión de MongoDB no puede ser nula o vacía.");
-    }
-
-    return new MongoClient(config.ConnectionString);
+    var settings = sp.GetRequiredService<IOptions<MongoDbSettings>>().Value;
+    return new MongoClient(settings.Server);
 });
+
+
+builder.Services.AddSingleton<ChatService>();
+builder.Services.AddSingleton<ChatHistorialService>();
+builder.Services.AddSingleton<ChatMensajeService>();
+builder.Services.AddSingleton<ChatUsuarioService>();
+
 
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
-
+builder.Services.AddControllersWithViews();
 
 
 builder.Services.Configure<RouteOptions>(options => options.LowercaseUrls = true);
@@ -64,20 +68,7 @@ builder.Services.AddCors(options =>
         });
 });
 
-
-
-
 var app = builder.Build();
-
-
-
-// Configure the HTTP request pipeline.
-//if (app.Environment.IsDevelopment())
-//{
-
-//}
-
-
 
 app.UseSwagger();
 app.UseSwaggerUI();
