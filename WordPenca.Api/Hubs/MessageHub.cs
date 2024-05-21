@@ -2,7 +2,6 @@
 using MongoDB.Bson;
 using MongoDB.Driver;
 using WordPenca.Business.Domain;
-using WordPenca.Business.Repository.Interface;
 using WordPenca.Business.Service;
 
 namespace WordPenca.Api.Hubs
@@ -143,7 +142,8 @@ namespace WordPenca.Api.Hubs
                     activo = false,
                     Description = "Mensaje enviado"
                 };
-                if(message.respuestaMensaje != null){
+                if (message.respuestaMensaje != null)
+                {
                     mensaje.RespuestaMensaje = message.respuestaMensaje;
                 }
 
@@ -172,4 +172,4 @@ namespace WordPenca.Api.Hubs
         }
     }
 }
-public record NewMessage(string Message, string ChatId, string UsuarioId, string UsuarioName,string? respuestaMensaje);
+public record NewMessage(string Message, string ChatId, string UsuarioId, string UsuarioName, string? respuestaMensaje);
