@@ -7,7 +7,7 @@ import {
   ViewChild,
 } from '@angular/core';
 import { ChatHubService } from '../../application/use-case/chat/chat-hub-service.use-case';
-import { map, Subscription } from 'rxjs';
+import { Subscription } from 'rxjs';
 import { ActivatedRoute } from '@angular/router';
 import { chatMensajeUseCaseProviders } from '../../intraestructure/delegate/delegate-chat-mensaje/delegateChatMensaje';
 import { chatUseCaseProviders } from '../../intraestructure/delegate/delegate-chat/delegateChat';
