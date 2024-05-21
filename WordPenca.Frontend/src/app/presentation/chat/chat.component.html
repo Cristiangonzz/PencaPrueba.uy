@@ -15,13 +15,31 @@
       <div class="message" *ngFor="let message of chatMensajes" [class.self]="message.id">
         <span class="time_date">{{message.usuarioName}}</span>
         <div class="message-content">{{ message.mensaje }}</div>
+        <div class="message-options">
+          <button (click)="mensajeMenu(message)">•••</button>
+          <div class="options-menu" *ngIf="message.activo">
+            <button (click)="contestarMensaje(message)">Responder</button>
+            <button (click)="editMessage(message)">Editar</button>
+            <button (click)="deleteMessage(message)">Eliminar</button>
+          </div>
+        </div>
       </div>
     </div>
     <div class="type_msg">
+
+      <div *ngIf="mensajeRespuesta" class="replying-to">
+        Respondiendo a: {{ mensajeRespuesta.mensaje }}
+        <button (click)="cancelarRespuesta()">Cancelar</button>
+      </div>
+
       <div class="chat-input">
+     
         <input type="text" [(ngModel)]="messageToSend" (keydown.enter)="sendMessage()" placeholder="Escribe un mensaje...">
-        <button (click)="sendMessage()" class="msg_send_btn" type="button"><i class="fa fa-paper-plane-o"
-          aria-hidden="true"></i></button>
+        
+        <button (click)="sendMessage()" class="msg_send_btn" type="button">
+          <i class="fa fa-paper-plane-o" aria-hidden="true"></i>
+        </button>
+     
       </div>
     </div>
 
