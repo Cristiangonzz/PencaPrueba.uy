@@ -12,7 +12,13 @@
       <tr *ngFor="let user of usuarios; let srNo  = index">
         <td>{{ user.id }}</td>
         <td>{{ user.name }}</td>
+        <td>
+          
+          <button type="button" class="btn btn-primary" (click)="irChat(user.id,user.name)">Chat</button>
+        
+      </td>
       </tr>
+     
     </tbody>
   </table>
 
@@ -31,12 +37,6 @@
         <td>{{ chat.id }}</td>
         <td>{{ chat.usuarios[0].name }}</td>
         <td>{{ chat.usuarios[1].name }}</td>
-        
-        <td>
-          
-            <button type="button" class="btn btn-primary" (click)="irChat(chat.id)">Chat</button>
-          
-        </td>
       </tr>
     </tbody>
   </table>

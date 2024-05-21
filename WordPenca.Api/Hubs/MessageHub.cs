@@ -27,95 +27,111 @@ namespace WordPenca.Api.Hubs
         public async Task JoinGroup(string chatId, string usuarioId)
         {
             //Falta recargar el histoprial cuando entre al chat
-          
+
             try
             {
                 await Groups.AddToGroupAsync(Context.ConnectionId, chatId);
-                await Clients.Group(chatId).SendAsync("NewUser", $"{usuarioId} entró al canal");
-
                 ///Agrego el chat a la lista que tiene el usuario
-                ChatUsuario chatUsuario = await this._chatUsuarioService.GetUsuarioByChat(chatId);
+                ChatUsuario chatUsuario = await _chatUsuarioService.GetUsuarioByChat(chatId);
                 if (chatUsuario == null)
                 {
-                    bool agregarEstado = await this._chatUsuarioService.AgregarChatAUsuario(usuarioId, chatId);
+                    chatUsuario = await _chatUsuarioService.AgregarChatAUsuario(usuarioId, chatId);
+                    ChatMensaje mensaje = new ChatMensaje
+                    {
+                        Id = ObjectId.GenerateNewId().ToString(),
+                        mensaje = $"{chatUsuario.Name} se unio al chat",
+                        CreationDate = DateTime.Now,
+                        Usuario = usuarioId,
+                        UsuarioName = chatUsuario.Name,
+                        activo = false,
+                        Description = "Entrada al canal"
+                    };
+
+
+                    await Clients.Group(chatId).SendAsync("NewUser", mensaje);
+                    ChatMensaje chatMensajeCreado = await _chatMensajeService.CreateChatMensaje(mensaje);
+                    //Respaldos en el historial
+                    ChatHistorial chatHistorial = await _chatHistorialService.GetChatHistorialByChat(chatId);
+                    chatHistorial.Mensajes.Add(chatMensajeCreado);
+                    chatHistorial.UltimaActualizacion = DateTime.Now;
+                    await _chatHistorialService.UpdateChatHistorial(chatHistorial.Id, chatHistorial);
+
                 }
-               
-                ChatMensaje mensaje = new ChatMensaje
-                {
-
-                    Id = ObjectId.GenerateNewId().ToString(),
-                    mensaje = $"{usuarioId} entró al canal",
-                    CreationDate = DateTime.Now,
-                    Usuario = usuarioId,
-                    activo = false,
-                    Description = "Entrada al canal"
-                };
 
 
 
-                ChatMensaje chatMensajeCreado =  await _chatMensajeService.CreateChatMensaje(mensaje);
 
-                //Respaldos en el historial
-
-                ChatHistorial chatHistorial = await _chatHistorialService.GetChatHistorialByChat(chatId);
-                chatHistorial.Mensajes.Add(chatMensajeCreado);
-                chatHistorial.UltimaActualizacion = DateTime.Now;
-                bool estado = await _chatHistorialService.UpdateChatHistorial(chatHistorial.Id,chatHistorial);
-               
             }
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
             }
-            
+
         }
 
         public async Task LeaveGroup(string chatId, string usuarioId)
         {
             try
             {
-                await Groups.RemoveFromGroupAsync(Context.ConnectionId, chatId);
-                await Clients.Group(chatId).SendAsync("LeftUser", $"{usuarioId} Salio del canal");
 
-                ChatMensaje mensaje = new ChatMensaje
+                ChatUsuario chatUsuario = await _chatUsuarioService.GetUsuarioByChat(chatId);
+                if (chatUsuario != null)
                 {
-                    Id = ObjectId.GenerateNewId().ToString(),
-                    mensaje = $"{usuarioId} salió del canal",
-                    CreationDate = DateTime.Now,
-                    Usuario = usuarioId,
-                    activo = false,
-                    Description = "Salida del canal"
-                };
+                    ChatMensaje mensajeSistema = new ChatMensaje
+                    {
+                        Id = ObjectId.GenerateNewId().ToString(),
+                        mensaje = $"{chatUsuario.Name} salió del chat",
+                        CreationDate = DateTime.Now,
+                        Usuario = usuarioId,
+                        UsuarioName = chatUsuario.Name,
+                        activo = false,
+                        Description = "Salida del canal"
+                    };
 
-                ChatMensaje mensajeCreado = await _chatMensajeService.CreateChatMensaje(mensaje);
+                    ///Elimino el chat a la lista que tiene el usuario
+                    chatUsuario.Chats.Remove(chatId);
+                    await _chatUsuarioService.UpdateChatUsuario(chatUsuario.Id, chatUsuario);
+                    await Groups.RemoveFromGroupAsync(Context.ConnectionId, chatId);
+                    await Clients.Group(chatId).SendAsync("LeftUser", mensajeSistema);
 
-                //Respaldos en el historial
-                ChatHistorial chatHistorial = await _chatHistorialService.GetChatHistorialByChat(chatId);
-                chatHistorial.Mensajes.Add(mensajeCreado);
-                chatHistorial.UltimaActualizacion = DateTime.Now;
-                bool estado = await _chatHistorialService.UpdateChatHistorial(chatHistorial.Id, chatHistorial);
-                if (estado)
-                {
-                    Console.WriteLine("Se Actualizo el historial");
+                    ChatMensaje mensaje = new ChatMensaje
+                    {
+                        Id = ObjectId.GenerateNewId().ToString(),
+                        mensaje = $"{chatUsuario.Name} salió del canal",
+                        CreationDate = DateTime.Now,
+                        Usuario = usuarioId,
+                        UsuarioName = chatUsuario.Name,
+                        activo = false,
+                        Description = "Salida del canal"
+                    };
+
+
+                    ChatMensaje mensajeCreado = await _chatMensajeService.CreateChatMensaje(mensaje);
+
+                    //Respaldos en el historial
+                    ChatHistorial chatHistorial = await _chatHistorialService.GetChatHistorialByChat(chatId);
+                    chatHistorial.Mensajes.Add(mensajeCreado);
+                    chatHistorial.UltimaActualizacion = DateTime.Now;
+                    await _chatHistorialService.UpdateChatHistorial(chatHistorial.Id, chatHistorial);
+
+
                 }
-                else
-                {
-                    Console.WriteLine("Error al actualizar el historial");
-                }
+
+
+
+
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
             }
-           
+
         }
 
         public async Task SendMessage(NewMessage message)
         {
             try
             {
-                EnviarMessage messageToSend = new EnviarMessage(message.UsuarioId, message.Message);
-                await Clients.Group(message.ChatId).SendAsync("NewMessage", messageToSend);
 
                 ChatMensaje mensaje = new ChatMensaje
                 {
@@ -123,6 +139,7 @@ namespace WordPenca.Api.Hubs
                     mensaje = message.Message,
                     CreationDate = DateTime.Now,
                     Usuario = message.UsuarioId,
+                    UsuarioName = message.UsuarioName,
                     activo = false,
                     Description = "Mensaje enviado"
                 };
@@ -131,21 +148,16 @@ namespace WordPenca.Api.Hubs
                 // Insertar mensaje en la colección de mensajes
                 ChatMensaje mensajeCreado = await _chatMensajeService.CreateChatMensaje(mensaje);
 
+                await Clients.Group(message.ChatId).SendAsync("NewMessage", mensaje);
+
                 // Actualizar historial del chat
                 //Respaldos en el historial
 
                 ChatHistorial chatHistorial = await _chatHistorialService.GetChatHistorialByChat(message.ChatId);
                 chatHistorial.Mensajes.Add(mensajeCreado);
                 chatHistorial.UltimaActualizacion = DateTime.Now;
-                bool estado = await _chatHistorialService.UpdateChatHistorial(chatHistorial.Id, chatHistorial);
-                if (estado)
-                {
-                    Console.WriteLine("Se Actualizo el historial");
-                }
-                else
-                {
-                    Console.WriteLine("Error al actualizar el historial");
-                }
+                await _chatHistorialService.UpdateChatHistorial(chatHistorial.Id, chatHistorial);
+
             }
             catch (Exception ex)
             {
@@ -157,5 +169,4 @@ namespace WordPenca.Api.Hubs
         }
     }
 }
-public record NewMessage(string Message, string ChatId, string UsuarioId);
-public record EnviarMessage(string? UserName, string Message);
+public record NewMessage(string Message, string ChatId, string UsuarioId, string UsuarioName);

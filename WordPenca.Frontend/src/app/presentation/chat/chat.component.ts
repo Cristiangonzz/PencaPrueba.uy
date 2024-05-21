@@ -27,15 +27,16 @@ import { IChatMensajeDomain } from '../../domain/interfaces/chat/IChatMensajeDom
 export class ChatComponent implements OnInit, OnDestroy, AfterViewChecked {
   //delegateCategoria = chatUseCaseProviders;
   chat!: ChatDomainEntity;
-  chatHistorial!: ChatHistorialDomainEntity;
+  chatHistorial: ChatHistorialDomainEntity = {} as ChatHistorialDomainEntity;
   chatMensajes: ChatMensajeDomainEntity[] = [];
   delegateChat = chatUseCaseProviders;
   delegateChatmensaje = chatMensajeUseCaseProviders;
-  public chatId = '';
-  public UsuarioId = '';
-  public messageToSend = '';
+  chatId = '';
+  UsuarioId = '';
+  UsuarioName = '';
+
+  messageToSend = '';
   sweet = new SweetAlert();
-  public conversation!: ReciboMessage[];
   private conversationSubscription: Subscription | undefined;
   @ViewChild('scrollMe') private scrollContainer!: ElementRef;
   constructor(
@@ -52,25 +53,17 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewChecked {
   }
 
   ngOnInit(): void {
+    this.join();
     //this.chatHubService.conexionWebSocket();
     this.getChat();
-    this.chatHubService.canalMesaggeEmmit$
-      .pipe(
-        map((conversation: ReciboMessage[]) => {
-          console.log("La conversacion" + conversation) 
-          return conversation?.map((msg: ReciboMessage) => {
-            return {
-              mensaje: msg.message,
-              activo: true,
-              usuario: msg.userName,
-            } as IChatMensajeDomain;
-          }) || [];
-        })
-      )
-      .subscribe((mensajesTranformado: IChatMensajeDomain[]) => {
-        this.chatMensajes = [...this.chatMensajes, ...mensajesTranformado];
-        console.log("mensajes" + JSON.stringify(this.chatMensajes) )
-      });
+    this.chatHubService.canalMesaggeEmmit$.subscribe(
+      (mensaje: IChatMensajeDomain) => {
+        if (mensaje != null) {
+          this.chatMensajes.push(mensaje);
+          console.log('mensajes recibido' + JSON.stringify(this.chatMensajes));
+        }
+      }
+    );
   }
 
   ngAfterViewChecked(): void {
@@ -81,25 +74,31 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewChecked {
     }
   }
 
-
-  getHistorial(){
+  getHistorial() {
     this.delegateChat.getChatHistorialUseCaseProvider
-      .useFactory(this.chatServicio).execute(this.chatId)
+      .useFactory(this.chatServicio)
+      .execute(this.chatId)
       .subscribe({
         next: (value: ResponseDomainEntity<ChatHistorialDomainEntity>) => {
-
           this.chatHistorial = value.value!;
-          this.chatMensajes = value.value?.chatMensaje || [];
-          console.log("mensajes" + JSON.stringify(this.chatMensajes) );
+          this.chatMensajes = value.value!.mensajes;
+          console.log('Historial' + JSON.stringify(this.chatHistorial));
+          console.log('Historial' + JSON.stringify(this.chatMensajes));
         },
         error: () => {
-          this.sweet.toFire('Historial', 'Error al Obtener Chat Historial', 'error');
+          this.sweet.toFire(
+            'Historial',
+            'Error al Obtener Chat Historial',
+            'error'
+          );
         },
       });
   }
   getChat() {
-    this.chatId = this.activatedRoute.snapshot.params['id'];
-    
+    this.chatHubService.join(
+      this.chatId,
+      this.activatedRoute.snapshot.params['id']
+    );
     //this.activatedRoute.snapshot.paramMap.get('chatId') || ''; otra opcion
     this.delegateChat.getChatUseCaseProvider
       .useFactory(this.chatServicio)
@@ -107,6 +106,7 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewChecked {
       .subscribe({
         next: (value: ResponseDomainEntity<ChatDomainEntity>) => {
           this.chat = value.value!;
+          console.log('El Chat' + JSON.stringify(this.chat));
           this.getHistorial();
         },
         error: () => {
@@ -115,15 +115,19 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewChecked {
       });
   }
 
-  public join() {
+  join() {
+    this.chatId = '664bfb5c5d354fe624128255';
+    this.UsuarioId = this.activatedRoute.snapshot.params['id'];
+    this.UsuarioName = this.activatedRoute.snapshot.params['usuarioName'];
     this.chatHubService.join(this.chatId, this.UsuarioId);
   }
 
   public sendMessage() {
     const newMessage: EnvioNewMessage = {
-      message: this.messageToSend,
-      chatId: this.chatId,
-      userId: this.UsuarioId,
+      Message: this.messageToSend,
+      ChatId: this.chatId,
+      UsuarioId: this.UsuarioId,
+      UsuarioName: this.UsuarioName,
     };
     this.chatHubService.sendMessage(newMessage);
     this.messageToSend = '';
@@ -144,12 +148,8 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewChecked {
 }
 //(string? UserName, string Message, string? GroupName, Guid ChatId, Guid UserId);
 interface EnvioNewMessage {
-  message: string;
-  chatId: string;
-  userId: string;
-}
-
-interface ReciboMessage {
-  userName: string;
-  message: string;
+  Message: string;
+  ChatId: string;
+  UsuarioId: string;
+  UsuarioName: string;
 }

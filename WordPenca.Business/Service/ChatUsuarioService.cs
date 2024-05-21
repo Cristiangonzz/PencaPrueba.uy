@@ -10,10 +10,10 @@ namespace WordPenca.Business.Service
 
     public class ChatUsuarioService
     {
-        
+
         private IMongoCollection<ChatUsuario> _collection;
 
-       
+
         public ChatUsuarioService(IMongoClient mongoClient, IOptions<MongoDbSettings> mongoDbSettings)
         {
             var database = mongoClient.GetDatabase(mongoDbSettings.Value.DataBase);
@@ -43,31 +43,32 @@ namespace WordPenca.Business.Service
                 _collection.ReplaceOne(x => x.Id == id, chatUsuario);
                 return true;
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
-            
+
                 return false;
             }
-            
+
         }
-        async public Task<bool> AgregarChatAUsuario(string idUsuario, string idChat)
+        async public Task<ChatUsuario> AgregarChatAUsuario(string idUsuario, string idChat)
         {
             try
             {
                 ChatUsuario chatUsuario = await _collection.FindAsync<ChatUsuario>(x => x.Id == idUsuario).Result.FirstOrDefaultAsync();
                 chatUsuario.Chats.Add(idChat);
                 _collection.ReplaceOne(x => x.Id == idUsuario, chatUsuario);
-                return true;
+                return chatUsuario;
             }
             catch (Exception ex)
             {
                 Console.WriteLine("No se pudo agregar el chat a la lista de chat del usuario" + ex.Message);
 
-                return false;
+                return null;
             }
 
         }
+
 
         public void RemoveChatUsuario(string id)
         {
@@ -75,7 +76,7 @@ namespace WordPenca.Business.Service
         }
 
         //Funciones para la conexiones de los usuarios
-        
+
 
 
     }

@@ -83,7 +83,7 @@ namespace WordPenca.Api.Controllers
                 ChatHistorial historialCreado = await this._chatHistorialService.CreateChatHistorial(chatHistorial);
                 chatCreado.Historial = historialCreado;
 
-                await _chatService.UpdateChat(chatCreado.Id,chatCreado);
+                await _chatService.UpdateChat(chatCreado.Id, chatCreado);
 
 
                 _ResponseDTO = new ResponseDTO<Chat>() { status = true, msg = "ok", value = chatCreado };
@@ -109,6 +109,7 @@ namespace WordPenca.Api.Controllers
                     Id = ObjectId.GenerateNewId().ToString(),
                     mensaje = request.mensaje!,
                     Usuario = request.usuario!,
+                    UsuarioName = request.usuarioName!,
                     activo = false,
                     CreationDate = DateTime.UtcNow,
 
@@ -272,7 +273,7 @@ namespace WordPenca.Api.Controllers
 
                 if (listChats.Count > 0)
                     _ResponseDTO = new ResponseDTO<List<Chat>>() { status = true, msg = "ok", value = listChats };
-                    
+
                 else
                     _ResponseDTO = new ResponseDTO<List<Chat>>() { status = false, msg = "Lista Vacia", value = null };
 

@@ -9,7 +9,11 @@ namespace WordPenca.Common.Dto
 
         [Required]
         public string mensaje { get; set; } = null!;
-        public string? usuario { get; set; } // por momento
+
+        [Required]
+        public string usuarioName { get; set; } = null!;
+        [Required]
+        public string usuario { get; set; } = null!; // por momento
 
 
     }

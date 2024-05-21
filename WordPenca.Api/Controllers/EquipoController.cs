@@ -49,7 +49,7 @@ namespace WordPenca.Api.Controllers
             string chatId = "";
             string usuarioId = "";
 
-            NewMessage message = new NewMessage("Api de Match", chatId, usuarioId);
+            //NewMessage message = new NewMessage("Api de Match", chatId, usuarioId);
             using (var response = await client.SendAsync(request))
             {
                 response.EnsureSuccessStatusCode();
@@ -59,7 +59,7 @@ namespace WordPenca.Api.Controllers
                     var body = await response.Content.ReadAsStringAsync();
                     Console.WriteLine(body);
 
-                    await _hubContext.Clients.Group(message.ChatId).SendAsync("NewMessage", message);
+                    //await _hubContext.Clients.Group(message.ChatId).SendAsync("NewMessage", message);
 
                     return StatusCode(StatusCodes.Status200OK, body);
                 }
@@ -86,7 +86,7 @@ namespace WordPenca.Api.Controllers
                 Equipo _producto = _mapper.Map<Equipo>(request);
 
 
-                 _producto = await this._unitOfWork.Equipo.Add(_producto);
+                _producto = await this._unitOfWork.Equipo.Add(_producto);
 
                 if (_producto.id != null)
                     _ResponseDTO = new ResponseDTO<EquipoDTO>() { status = true, msg = "ok", value = _mapper.Map<EquipoDTO>(_producto) };
@@ -111,8 +111,8 @@ namespace WordPenca.Api.Controllers
             try
             {
                 List<EquipoDTO> ListaEquiposDto = new List<EquipoDTO>();
-                IEnumerable<Equipo> listEquipos =  await this._unitOfWork.Equipo.GetAll();
-                
+                IEnumerable<Equipo> listEquipos = await this._unitOfWork.Equipo.GetAll();
+
 
                 ListaEquiposDto = _mapper.Map<List<EquipoDTO>>(listEquipos.ToList());
 
@@ -155,7 +155,7 @@ namespace WordPenca.Api.Controllers
                         _ResponseDTO = new ResponseDTO<bool>() { status = true, msg = "ok", value = true };
 
                     }
-                    catch(Exception ex)
+                    catch (Exception ex)
                     {
                         _ResponseDTO = new ResponseDTO<bool>() { status = false, msg = "No se pudo editar el producto : " + ex.Message };
                         return StatusCode(StatusCodes.Status500InternalServerError, _ResponseDTO);

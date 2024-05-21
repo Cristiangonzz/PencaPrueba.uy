@@ -20,7 +20,7 @@ const routes: Routes = [
       import('./presentation/equipo/equipo.module').then((m) => m.EquipoModule),
   },
   {
-    path: 'chat/:id',
+    path: 'chat/:id/:usuarioName',
     //canActivate: [BackGuard],
     loadChildren: () =>
       import('./presentation/chat/chat.module').then((m) => m.ChatModule),

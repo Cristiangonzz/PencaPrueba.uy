@@ -2,30 +2,19 @@ import { BehaviorSubject, Subject } from 'rxjs';
 import { Injectable } from '@angular/core';
 //import { HubConnection, HubConnectionBuilder } from '@microsoft/signalr';
 import * as signalR from '@microsoft/signalr';
+import { ChatMensajeDomainEntity } from '../../../domain/entity/ChatMensajeEntity';
 @Injectable({
   providedIn: 'root',
 })
 export class ChatHubService {
-  //Subject para los mensajes que se recibe
-  public userName = '';
-  public groupName = '';
-  public messageToSend = '';
-  public joined = false;
-
   public conexionUsuario!: Subject<boolean>;
-  public content!: NewMessage[];
-  public canalMesaggeEmmit$: BehaviorSubject<NewMessage[]> =
-    new BehaviorSubject<NewMessage[]>(this.content);
+  public content!: ChatMensajeDomainEntity;
+  public canalMesaggeEmmit$: BehaviorSubject<ChatMensajeDomainEntity> =
+    new BehaviorSubject<ChatMensajeDomainEntity>(this.content);
 
-  public conversation: NewMessage[] = [
-    {
-      userName: 'Sistema',
-      message: 'Bienvenido',
-    },
-  ];
   // private connection: HubConnection;
   public connection: signalR.HubConnection = new signalR.HubConnectionBuilder()
-    .withUrl('http://localhost:5000/hubs/chat')
+    .withUrl('http://localhost:5118/hubs/chat')
     .configureLogging(signalR.LogLevel.Information)
     .build();
   constructor() {
@@ -35,11 +24,15 @@ export class ChatHubService {
     //   .build();
 
     this.conexionWebSocket();
-    this.connection.on('NewUser', (message: string) => this.newUser(message));
-    this.connection.on('NewMessage', (message: NewMessage) =>
+    this.connection.on('NewUser', (message: ChatMensajeDomainEntity) =>
+      this.newUser(message)
+    );
+    this.connection.on('NewMessage', (message: ChatMensajeDomainEntity) =>
       this.newMessage(message)
     );
-    this.connection.on('LeftUser', (message: string) => this.leftUser(message));
+    this.connection.on('LeftUser', (message: ChatMensajeDomainEntity) =>
+      this.leftUser(message)
+    );
   }
   public async conexionWebSocket() {
     await this.connection
@@ -54,9 +47,7 @@ export class ChatHubService {
   //(string? UserName, string Message, string? GroupName, Guid ChatId, Guid UserId);
   public sendMessage(newMessage: EnvioNewMessage): void {
     if (this.connection.state === 'Connected') {
-      this.connection
-        .invoke('SendMessage', newMessage)
-        .then((_) => (this.messageToSend = ''));
+      this.connection.invoke('SendMessage', newMessage);
     } else {
       console.error('La conexión no está en estado Connected.');
       // Puedes manejar este caso según tus necesidades, como intentar reconectar automáticamente.
@@ -69,13 +60,9 @@ export class ChatHubService {
       .then((_) => this.conexionUsuario.next(false));
   }
 
-  public newUser(message: string): void {
+  public newUser(message: ChatMensajeDomainEntity): void {
     console.log(message);
-    this.conversation.push({
-      userName: 'Sistema',
-      message: message,
-    });
-    this.content = this.conversation;
+    this.content = message;
     this.canalMesaggeEmmit$.next(this.content);
   }
 
@@ -90,30 +77,22 @@ export class ChatHubService {
     }
   }
 
-  public newMessage(message: NewMessage): void {
-    console.log(message);
-    this.conversation.push(message);
-    this.content = this.conversation;
+  public newMessage(message: ChatMensajeDomainEntity): void {
+    console.log('Mensaje del emisor : ' + message);
+
+    this.content = message;
     this.canalMesaggeEmmit$.next(this.content);
   }
 
-  public leftUser(message: string): void {
+  public leftUser(message: ChatMensajeDomainEntity): void {
     console.log(message);
-    this.conversation.push({
-      userName: 'Sistema',
-      message: message,
-    });
-
-    this.content = this.conversation;
+    this.content = message;
     this.canalMesaggeEmmit$.next(this.content);
   }
-}
-interface NewMessage {
-  userName: string;
-  message: string;
 }
 interface EnvioNewMessage {
-  message: string;
-  chatId: string;
-  userId: string;
+  Message: string;
+  ChatId: string;
+  UsuarioId: string;
+  UsuarioName: string;
 }

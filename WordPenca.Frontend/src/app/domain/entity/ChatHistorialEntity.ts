@@ -5,18 +5,18 @@ import { IChatMensajeDomain } from '../interfaces/chat/IChatMensajeDomain';
 export class ChatHistorialDomainEntity implements IChatHistorialDomain {
   id: string;
   chat: IChatDomain;
-  chatMensaje: IChatMensajeDomain[];
+  mensajes: IChatMensajeDomain[];
   creationDate?: string | Date | null | undefined;
 
   constructor(
     chat: IChatDomain,
-    chatMensaje: IChatMensajeDomain[],
-    id?: string,
+    mensajes: IChatMensajeDomain[],
+    id: string,
     creationDate?: string | Date | null
   ) {
-    this.id = id as string;
+    this.id = id;
     this.chat = chat as IChatDomain;
-    this.chatMensaje = chatMensaje as IChatMensajeDomain[];
+    this.mensajes = mensajes as IChatMensajeDomain[];
     this.creationDate = creationDate as string | Date | null;
   }
 }

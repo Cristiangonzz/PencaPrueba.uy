@@ -11,7 +11,7 @@ import { UpdateChatMensajeDto } from '../../dto/update/updateChatMensajeDTO';
   providedIn: 'root',
 })
 export class ChatMensajeImplentationService extends ChatMensajeService {
-  URL = 'http://localhost:5000';
+  URL = 'http://localhost:5118';
 
   constructor(private http: HttpClient) {
     super();

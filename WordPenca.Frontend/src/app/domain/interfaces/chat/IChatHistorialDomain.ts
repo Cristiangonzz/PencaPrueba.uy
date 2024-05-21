@@ -4,6 +4,6 @@ import { IChatMensajeDomain } from './IChatMensajeDomain';
 export interface IChatHistorialDomain {
   id: string;
   chat: IChatDomain;
-  chatMensaje: IChatMensajeDomain[];
+  mensajes: IChatMensajeDomain[];
   creationDate?: Date | string | null;
 }

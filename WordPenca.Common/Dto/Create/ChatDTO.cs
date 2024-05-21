@@ -4,8 +4,10 @@ namespace WordPenca.Common.Dto
 {
     public class ChatDTO
     {
-        public string usuarioCreadorId { get; set; }
-        public string? usuarioInvitadoId { get; set; }
+        [Required]
+        public string usuarioCreadorId { get; set; } = null!;
+        [Required]
+        public string usuarioInvitadoId { get; set; } = null!;
         public string? Name { get; set; }
         [Required]
         public bool Privado { get; set; }

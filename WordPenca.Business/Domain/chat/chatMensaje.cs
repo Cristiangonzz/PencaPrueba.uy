@@ -14,6 +14,7 @@ namespace WordPenca.Business.Domain
         public bool activo { get; set; } = false; //leido o no leido
         public string? Description { get; set; }
         public string Usuario { get; set; } = null!;
+        public string UsuarioName { get; set; } = null!;
         public DateTime CreationDate { get; set; } //Es el que le va dar orden al chat
 
     }

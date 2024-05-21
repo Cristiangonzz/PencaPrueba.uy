@@ -15,8 +15,8 @@ import { ChatDomainEntity } from '../../../domain/entity/ChatEntity';
   styleUrl: './index.component.css',
 })
 export class IndexComponent implements OnInit, OnDestroy, AfterViewInit {
-  usuarios!: ChatUsuarioDomainEntity[];
-  chats!: ChatDomainEntity[];
+  usuarios: ChatUsuarioDomainEntity[] = [];
+  chats: ChatDomainEntity[] = [];
 
   delegateChat = chatUseCaseProviders;
   delegateChatmensaje = chatMensajeUseCaseProviders;
@@ -42,8 +42,7 @@ export class IndexComponent implements OnInit, OnDestroy, AfterViewInit {
 
     this.delegateChat.getAllChatUsuariosUseCaseProvider
       .useFactory(this.chatServicio)
-      .statusEmmit
-      .subscribe({
+      .statusEmmit.subscribe({
         next: (value: ChatUsuarioDomainEntity[]) => {
           this.usuarios = value;
           console.log('usuarios : ' + JSON.stringify(this.usuarios, null, 2));
@@ -60,8 +59,7 @@ export class IndexComponent implements OnInit, OnDestroy, AfterViewInit {
 
     this.delegateChat.getAllChatUseCaseProvider
       .useFactory(this.chatServicio)
-      .statusEmmit
-      .subscribe({
+      .statusEmmit.subscribe({
         next: (value: ChatDomainEntity[]) => {
           this.chats = value;
           console.log('chats : ' + JSON.stringify(this.chats, null, 2));
@@ -106,8 +104,7 @@ export class IndexComponent implements OnInit, OnDestroy, AfterViewInit {
       });
   }
 
-  irChat(id: string) {
-    console.log('id : ' + id);
-    this.router.navigate([`chat/${id}`]);
+  irChat(id: string, usuarioName: string) {
+    this.router.navigate([`chat/${id}/${usuarioName}`]);
   }
 }
