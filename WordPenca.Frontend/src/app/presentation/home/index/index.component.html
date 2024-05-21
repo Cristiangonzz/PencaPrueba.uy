@@ -1,3 +1,39 @@
+<div class="container">
+  
+  
+  <div class="chat-list">
+    <div class="chat-item" *ngFor="let user of usuarios" (click)="irChat(user.id,user.name)">
+      <div class="chat-info">
+        <div class="chat-name">{{ user.id }}</div>
+        <div class="chat-last-message">{{ user.name }}</div>
+      </div>
+      <div class="chat-time">True</div>
+    </div>
+  </div>
+  
+  
+  <app-chat [chatData]="selectedChat"></app-chat>
+
+ 
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- 
+
+
 <div class="table-container" style="margin-top: 120px; text-align: center; overflow: auto; padding-bottom: 60px;">
   
   <table class="table table-bordered " style="width: 80%; margin: 0 auto;">
@@ -40,7 +76,31 @@
       </tr>
     </tbody>
   </table>
-</div>
+</div> -->
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 <!--<html lang="en">
 
@@ -80,7 +140,7 @@
         <!-- Begin Page Content -->
        <!-- <div class="container-fluid">-->
 
-          <p>Otro componente!!</p>
+          <!-- <p>Otro componente!!</p> -->
 
        <!-- </div>-->
         <!-- /.container-fluid -->

@@ -2,8 +2,11 @@ import {
   AfterViewChecked,
   Component,
   ElementRef,
+  Input,
+  OnChanges,
   OnDestroy,
   OnInit,
+  SimpleChanges,
   ViewChild,
 } from '@angular/core';
 import { ChatHubService } from '../../application/use-case/chat/chat-hub-service.use-case';
@@ -24,8 +27,10 @@ import { IChatMensajeDomain } from '../../domain/interfaces/chat/IChatMensajeDom
   templateUrl: './chat.component.html',
   styleUrl: './chat.component.css',
 })
-export class ChatComponent implements OnInit, OnDestroy, AfterViewChecked {
-  //delegateCategoria = chatUseCaseProviders;
+export class ChatComponent implements OnInit, OnDestroy, AfterViewChecked ,OnChanges{
+
+  @Input() chatData: { id: string, name: string } | null = null;
+
   chat!: ChatDomainEntity;
   chatHistorial: ChatHistorialDomainEntity = {} as ChatHistorialDomainEntity;
   chatMensajes: ChatMensajeDomainEntity[] = [];
@@ -36,14 +41,21 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewChecked {
   UsuarioName = '';
 
   messageToSend = '';
+  mensajeRespuesta: ChatMensajeDomainEntity | null = null;
   sweet = new SweetAlert();
   private conversationSubscription: Subscription | undefined;
   @ViewChild('scrollMe') private scrollContainer!: ElementRef;
   constructor(
     private chatHubService: ChatHubService,
-    private readonly activatedRoute: ActivatedRoute,
     private chatServicio: ChatService
   ) {}
+
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['chatData'] && this.chatData) {
+      this.join();
+    }
+  }
 
   ngOnDestroy(): void {
     // Asegúrate de cancelar la suscripción para evitar posibles fugas de memoria
@@ -53,8 +65,8 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewChecked {
   }
 
   ngOnInit(): void {
-    this.join();
-    //this.chatHubService.conexionWebSocket();
+    this.join();//Se inicia la conexion con el chat
+
     this.getChat();
     this.chatHubService.canalMesaggeEmmit$.subscribe(
       (mensaje: IChatMensajeDomain) => {
@@ -72,6 +84,26 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewChecked {
       this.scrollContainer.nativeElement.scrollTop =
         this.scrollContainer.nativeElement.scrollHeight;
     }
+  }
+  contestarMensaje(mensaje : ChatMensajeDomainEntity){
+    this.mensajeRespuesta = mensaje;
+    this.mensajeMenu(mensaje);
+  }
+
+  public mensajeMenu(message: ChatMensajeDomainEntity) {
+    message.activo = !message.activo;
+  }
+  cancelarRespuesta(){
+    this.mensajeRespuesta = null;
+  }
+  public editMessage(message: ChatMensajeDomainEntity) {
+    // Lógica para editar el mensaje
+    this.mensajeMenu(message); // Cerrar el menú después de seleccionar editar
+  }
+
+  public deleteMessage(message: ChatMensajeDomainEntity) {
+    // Lógica para eliminar el mensaje
+    this.mensajeMenu(message); // Cerrar el menú después de seleccionar eliminar
   }
 
   getHistorial() {
@@ -95,10 +127,7 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewChecked {
       });
   }
   getChat() {
-    this.chatHubService.join(
-      this.chatId,
-      this.activatedRoute.snapshot.params['id']
-    );
+   
     //this.activatedRoute.snapshot.paramMap.get('chatId') || ''; otra opcion
     this.delegateChat.getChatUseCaseProvider
       .useFactory(this.chatServicio)
@@ -115,13 +144,13 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewChecked {
       });
   }
 
-  join() {
+  join(){
     this.chatId = '664bfb5c5d354fe624128255';
-    this.UsuarioId = this.activatedRoute.snapshot.params['id'];
-    this.UsuarioName = this.activatedRoute.snapshot.params['usuarioName'];
+    this.UsuarioId = this.chatData?.id!;
+    this.UsuarioName =  this.chatData?.name!;
     this.chatHubService.join(this.chatId, this.UsuarioId);
   }
-
+  
   public sendMessage() {
     const newMessage: EnvioNewMessage = {
       Message: this.messageToSend,
@@ -129,8 +158,13 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewChecked {
       UsuarioId: this.UsuarioId,
       UsuarioName: this.UsuarioName,
     };
+
+    if (this.mensajeRespuesta) {
+      newMessage['Respuesta'] = this.mensajeRespuesta.id;
+    }
     this.chatHubService.sendMessage(newMessage);
     this.messageToSend = '';
+    this.mensajeRespuesta = null;
   }
 
   public leave() {
@@ -152,4 +186,5 @@ interface EnvioNewMessage {
   ChatId: string;
   UsuarioId: string;
   UsuarioName: string;
+  Respuesta?: string;
 }

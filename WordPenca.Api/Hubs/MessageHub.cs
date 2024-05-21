@@ -143,6 +143,9 @@ namespace WordPenca.Api.Hubs
                     activo = false,
                     Description = "Mensaje enviado"
                 };
+                if(message.respuestaMensaje != null){
+                    mensaje.RespuestaMensaje = message.respuestaMensaje;
+                }
 
 
                 // Insertar mensaje en la colección de mensajes
@@ -169,4 +172,4 @@ namespace WordPenca.Api.Hubs
         }
     }
 }
-public record NewMessage(string Message, string ChatId, string UsuarioId, string UsuarioName);
+public record NewMessage(string Message, string ChatId, string UsuarioId, string UsuarioName,string? respuestaMensaje);

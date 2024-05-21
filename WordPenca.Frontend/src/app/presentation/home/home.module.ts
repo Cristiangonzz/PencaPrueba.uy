@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { IndexComponent } from './index/index.component';
 import { RoutingHomeModule } from './routing-home.module';
 import { shareModule } from '../share/share.module';
+import { ChatModule } from '../chat/chat.module';
 
 @NgModule({
   declarations: [IndexComponent],
@@ -10,6 +11,7 @@ import { shareModule } from '../share/share.module';
     CommonModule,
     RoutingHomeModule,
     shareModule,
+    ChatModule
   ],
   exports: [IndexComponent],
 })
