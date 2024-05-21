@@ -2,12 +2,15 @@ import {
   AfterViewChecked,
   Component,
   ElementRef,
+  Input,
+  OnChanges,
   OnDestroy,
   OnInit,
+  SimpleChanges,
   ViewChild,
 } from '@angular/core';
 import { ChatHubService } from '../../application/use-case/chat/chat-hub-service.use-case';
-import { map, Subscription } from 'rxjs';
+import { Subscription } from 'rxjs';
 import { ActivatedRoute } from '@angular/router';
 import { chatMensajeUseCaseProviders } from '../../intraestructure/delegate/delegate-chat-mensaje/delegateChatMensaje';
 import { chatUseCaseProviders } from '../../intraestructure/delegate/delegate-chat/delegateChat';
@@ -24,8 +27,10 @@ import { IChatMensajeDomain } from '../../domain/interfaces/chat/IChatMensajeDom
   templateUrl: './chat.component.html',
   styleUrl: './chat.component.css',
 })
-export class ChatComponent implements OnInit, OnDestroy, AfterViewChecked {
-  //delegateCategoria = chatUseCaseProviders;
+export class ChatComponent implements OnInit, OnDestroy, AfterViewChecked ,OnChanges{
+
+  @Input() chatData: { id: string, name: string } | null = null;
+
   chat!: ChatDomainEntity;
   chatHistorial: ChatHistorialDomainEntity = {} as ChatHistorialDomainEntity;
   chatMensajes: ChatMensajeDomainEntity[] = [];
@@ -45,6 +50,13 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewChecked {
     private chatServicio: ChatService
   ) {}
 
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['chatData'] && this.chatData) {
+      this.join();
+    }
+  }
+
   ngOnDestroy(): void {
     // Asegúrate de cancelar la suscripción para evitar posibles fugas de memoria
     if (this.conversationSubscription) {
@@ -53,8 +65,8 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewChecked {
   }
 
   ngOnInit(): void {
-    this.join();
-    //this.chatHubService.conexionWebSocket();
+    this.join();//Se inicia la conexion con el chat
+
     this.getChat();
     this.chatHubService.canalMesaggeEmmit$.subscribe(
       (mensaje: IChatMensajeDomain) => {
@@ -95,10 +107,7 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewChecked {
       });
   }
   getChat() {
-    this.chatHubService.join(
-      this.chatId,
-      this.activatedRoute.snapshot.params['id']
-    );
+   
     //this.activatedRoute.snapshot.paramMap.get('chatId') || ''; otra opcion
     this.delegateChat.getChatUseCaseProvider
       .useFactory(this.chatServicio)
@@ -115,13 +124,13 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewChecked {
       });
   }
 
-  join() {
+  join(){
     this.chatId = '664bfb5c5d354fe624128255';
-    this.UsuarioId = this.activatedRoute.snapshot.params['id'];
-    this.UsuarioName = this.activatedRoute.snapshot.params['usuarioName'];
+    this.UsuarioId = this.chatData?.id!;
+    this.UsuarioName =  this.chatData?.name!;
     this.chatHubService.join(this.chatId, this.UsuarioId);
   }
-
+  
   public sendMessage() {
     const newMessage: EnvioNewMessage = {
       Message: this.messageToSend,

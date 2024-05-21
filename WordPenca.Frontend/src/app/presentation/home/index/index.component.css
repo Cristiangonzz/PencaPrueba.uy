@@ -1,13 +1,50 @@
-i {
-    color: #0747a6;
-    font-size: 20px;
-  }
-  .form-control {
-    border: 2px solid #347fca !important;
-  }
+.container {
+  display: flex;
+  height: 60vh;
+}
+
+.chat-list {
+  width: 30%;
+  border-right: 1px solid #ccc;
+  overflow-y: auto;
+}
+
+.chat-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px;
+  border-bottom: 1px solid #ccc;
+  cursor: pointer;
+}
+
+.chat-item:hover {
+  background-color: #f0f0f0;
+}
+
+.chat-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.chat-name {
+  font-weight: bold;
+}
+
+.chat-last-message {
+  color: #888;
+}
+
+.chat-time {
+  color: #888;
+}
+
+
+
+
+
   .content-container {
-    padding-top: 60px; /* Ajusta el valor según la altura de tu navbar */
-    padding-bottom: 60px; /* Ajusta el valor según la altura de tu footer */
+    padding-top: 60px; 
+    padding-bottom: 60px; 
     text-align: center;
     overflow: auto;
-  }
+  } 

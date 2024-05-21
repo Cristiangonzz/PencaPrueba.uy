@@ -14,7 +14,7 @@ export class ChatHubService {
 
   // private connection: HubConnection;
   public connection: signalR.HubConnection = new signalR.HubConnectionBuilder()
-    .withUrl('http://localhost:5118/hubs/chat')
+    .withUrl('http://localhost:5000/hubs/chat')
     .configureLogging(signalR.LogLevel.Information)
     .build();
   constructor() {

@@ -1,30 +1,51 @@
 
-  <div class="container mt-5">
+  <!-- <div class="container mt-5">   Agregar para si el chat es un Grupo para salir
     <div class="chat_header">
       <h3 class="text-center my-2">Bienvenido <span class="text-warning">{{ UsuarioName }}</span> Chat</h3>
       <button (click)="leave()" class="btn btn-danger">Salir del Chat</button>
     </div>
+ -->
+
+<div *ngIf="chatData">
+  <div class="chat-window">
+    <div class="chat_header">
+      <h3 class="text-center my-2">Bienvenido <span class="text-warning">{{ UsuarioName }}</span> Chat</h3>
+    </div>
+    <div #scrollMe class="msg_history">
+      <div class="message" *ngFor="let message of chatMensajes" [class.self]="message.id">
+        <span class="time_date">{{message.usuarioName}}</span>
+        <div class="message-content">{{ message.mensaje }}</div>
+      </div>
+    </div>
+    <div class="type_msg">
+      <div class="chat-input">
+        <input type="text" [(ngModel)]="messageToSend" (keydown.enter)="sendMessage()" placeholder="Escribe un mensaje...">
+        <button (click)="sendMessage()" class="msg_send_btn" type="button"><i class="fa fa-paper-plane-o"
+          aria-hidden="true"></i></button>
+      </div>
+    </div>
+
+      
+  </div>
+</div>
+<div *ngIf="!chatData">
+  <div class="chat-window">
+    <div class="chat_header">
+      <h3 class="text-center my-2">Bienvenido <span class="text-warning">{{ UsuarioName }}</span> Chat</h3>
+    </div>
+    <p> Selecciona un chat para empezar a conversar.</p>
+  </div>
+</div>
+
   
-       
-          <div #scrollMe class="msg_history">
-            <div *ngFor="let message of chatMensajes">
-             
-                  <div class="received_withd_msg">
-                    <span class="time_date">{{message.usuarioName}}</span>
-                    <p> {{message.mensaje}}</p>
-                  </div>
-                
-             
-                </div>
-          </div>
-          <div class="type_msg">
-            <div class="input_msg_write">
-              <input (keydown.enter)="sendMessage()" [(ngModel)]="messageToSend" type="text" class="write_msg"
-                placeholder="Type a message" />
-              <button (click)="sendMessage()" class="msg_send_btn" type="button"><i class="fa fa-paper-plane-o"
-                  aria-hidden="true"></i></button>
-            </div>
-          </div>
-        </div>
+
+
+
+
+
+
+
+
+
 
 

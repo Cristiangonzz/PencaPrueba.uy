@@ -24,6 +24,8 @@ export class IndexComponent implements OnInit, OnDestroy, AfterViewInit {
   sweet = new SweetAlert();
   private onDestroy$: Subject<void> = new Subject<void>();
 
+  selectedChat: { id: string, name: string } | null = null;
+
   constructor(private router: Router, private chatServicio: ChatService) {}
   ngAfterViewInit(): void {
     window.scrollTo(0, 0); // Renderizar hacia arriba de la pantalla
@@ -104,7 +106,8 @@ export class IndexComponent implements OnInit, OnDestroy, AfterViewInit {
       });
   }
 
-  irChat(id: string, usuarioName: string) {
-    this.router.navigate([`chat/${id}/${usuarioName}`]);
+  irChat(id: string, name: string) {
+    this.selectedChat = { id, name };
+    // this.router.navigate([`chat/${id}/${usuarioName}`]);
   }
 }
