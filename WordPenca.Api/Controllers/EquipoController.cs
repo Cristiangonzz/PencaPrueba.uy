@@ -5,6 +5,8 @@ using WordPenca.Business.Domain;
 using Microsoft.AspNetCore.SignalR;
 using WordPenca.Api.Hubs;
 using WordPenca.Business.Repository.Interface;
+using Newtonsoft.Json;
+using WordPenca.Api.quartz;
 
 
 namespace WordPenca.Api.Controllers
@@ -20,6 +22,7 @@ namespace WordPenca.Api.Controllers
         private readonly IMapper _mapper;
 
         private readonly IHubContext<MessageHub> _hubContext;
+        private readonly ILogger<GetMatchesJob> _logger;
 
         private readonly IHttpClientFactory _httpClientFactory;
         public EquipoController(IHttpClientFactory httpClientFactory, IUnitOfWork unitOfWork, IMapper mapper, IHubContext<MessageHub> hubContext)
@@ -35,6 +38,9 @@ namespace WordPenca.Api.Controllers
         [Route("Matches")]
         public async Task<IActionResult> GetMatches()
         {
+
+            _logger.LogInformation("GetMatches method called at {time}", DateTimeOffset.Now);
+
             var client = _httpClientFactory.CreateClient();
 
             var request = new HttpRequestMessage
@@ -56,9 +62,14 @@ namespace WordPenca.Api.Controllers
 
                 if (response.IsSuccessStatusCode)
                 {
-                    var body = await response.Content.ReadAsStringAsync();
-                    Console.WriteLine(body);
+                    //var body = await response.Content.ReadAsStringAsync();
+                    
 
+                    var body = await response.Content.ReadAsStringAsync();
+                    RootMatch matchesData = JsonConvert.DeserializeObject<RootMatch>(body);
+                    Console.WriteLine("Corriendo");
+                    return Ok(matchesData);        
+            
                     //await _hubContext.Clients.Group(message.ChatId).SendAsync("NewMessage", message);
 
                     return StatusCode(StatusCodes.Status200OK, body);

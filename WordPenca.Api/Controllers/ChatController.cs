@@ -228,31 +228,31 @@ namespace WordPenca.Api.Controllers
 
 
         [HttpGet]
-        [Route("obtenerChatUsuario/{idUser}")]
-        public async Task<IActionResult> ListGetAll([FromRoute] string idUser)
+        [Route("chatsUsuario/{idUser}")]
+        public async Task<IActionResult> ChatsUsuario([FromRoute] string idUser)
         {
 
-            ResponseDTO<List<ChatDTO>> _ResponseDTO = new ResponseDTO<List<ChatDTO>>();
+            ResponseDTO<List<Chat>> _ResponseDTO = new ResponseDTO<List<Chat>>();
 
             try
             {
 
-                var chats = await this._chatService.GetChatUser(idUser);
+                List<Chat> chats = await this._chatService.GetChatUser(idUser); //Obtienes todos los chat del usuario 
 
-                List<ChatDTO> listaChat = chats.Select(chat => _mapper.Map<ChatDTO>(chat)).ToList();
+                // List<ChatDTO> listaChat = chats.Select(chat => _mapper.Map<ChatDTO>(chat)).ToList();
 
 
 
-                if (listaChat.Count > 0)
-                    _ResponseDTO = new ResponseDTO<List<ChatDTO>>() { status = true, msg = "ok", value = listaChat };
+                if (chats.Count > 0)
+                    _ResponseDTO = new ResponseDTO<List<Chat>>() { status = true, msg = "ok", value = chats };
                 else
-                    _ResponseDTO = new ResponseDTO<List<ChatDTO>>() { status = false, msg = "Lista Vacia", value = null };
+                    _ResponseDTO = new ResponseDTO<List<Chat>>() { status = false, msg = "Lista Vacia", value = null };
 
                 return StatusCode(StatusCodes.Status200OK, _ResponseDTO);
             }
             catch (Exception ex)
             {
-                _ResponseDTO = new ResponseDTO<List<ChatDTO>>() { status = false, msg = ex.Message, value = null };
+                _ResponseDTO = new ResponseDTO<List<Chat>>() { status = false, msg = ex.Message, value = null };
                 return StatusCode(StatusCodes.Status500InternalServerError, _ResponseDTO);
             }
         }

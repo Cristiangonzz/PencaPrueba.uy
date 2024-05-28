@@ -1,8 +1,10 @@
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 using MongoDB.Driver;
+using Quartz;
+using WordPenca.Api.Controllers;
 using WordPenca.Api.Hubs;
+using WordPenca.Api.quartz;
 using WordPenca.Business.Domain;
 using WordPenca.Business.Persistence;
 using WordPenca.Business.Repository.Implementation;
@@ -72,6 +74,32 @@ builder.Services.AddCors(options =>
         });
 });
 
+
+// Configure Quartz services
+builder.Services.AddQuartz(q =>
+{
+    q.UseMicrosoftDependencyInjectionJobFactory();
+
+    var jobKey = new JobKey("GetMatchesJob");
+
+    q.AddJob<GetMatchesJob>(opts => opts.WithIdentity(jobKey));
+
+    q.AddTrigger(opts => opts
+        .ForJob(jobKey)
+        .WithIdentity("GetMatchesJob-trigger")
+        .WithCronSchedule("0/10 * * * * ?")); // Every 6 seconds
+});
+
+builder.Services.AddQuartzHostedService(options =>
+{
+    options.WaitForJobsToComplete = true;
+});
+
+
+// builder.Services.AddSingleton<GetMatchesJob>();
+// builder.Services.AddHostedService<QuartzHostedService>();
+
+
 var app = builder.Build();
 
 app.UseSwagger();
@@ -92,3 +120,5 @@ app.MapControllers();
 
 
 app.Run();
+
+

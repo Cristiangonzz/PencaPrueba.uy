@@ -67,7 +67,9 @@ namespace WordPenca.Api.Hubs
             }
 
         }
-
+        public async Task JoinGroupMatch(){
+            await Groups.AddToGroupAsync(Context.ConnectionId, "Match");
+        }
         public async Task LeaveGroup(string chatId, string usuarioId)
         {
             try
