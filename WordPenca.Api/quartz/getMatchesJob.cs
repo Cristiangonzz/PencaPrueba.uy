@@ -11,7 +11,7 @@ namespace WordPenca.Api.quartz
     {
         private readonly ILogger<GetMatchesJob> _logger;
         private readonly IHttpClientFactory _httpClientFactory;
-         private readonly IHubContext<MessageHub> _hubContext;
+        private readonly IHubContext<MessageHub> _hubContext;
 
         public GetMatchesJob(ILogger<GetMatchesJob> logger, IHttpClientFactory httpClientFactory,IHubContext<MessageHub> hubContext)
         {
@@ -45,12 +45,13 @@ namespace WordPenca.Api.quartz
                 if (response.IsSuccessStatusCode)
                 {
                     var body = await response.Content.ReadAsStringAsync();
-                    RootMatch matchesData = JsonConvert.DeserializeObject<RootMatch>(body);
+                    RootMatch matchsData = JsonConvert.DeserializeObject<RootMatch>(body);
                     Console.WriteLine("Corriendo");
-                    _logger.LogInformation("Matches data: {data}", matchesData);
+                    _logger.LogInformation("Matches data: {data}", matchsData);
 
 
-                    await _hubContext.Clients.Group("Match").SendAsync("NewMatch", body);
+                    //await _hubContext.Clients.Group("Match").SendAsync("NewMatch", matchsData);
+                    await _hubContext.Clients.All.SendAsync("NewMatch", matchsData);
                 }
                 else
                 {
