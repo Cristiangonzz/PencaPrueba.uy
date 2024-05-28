@@ -1,25 +1,167 @@
 
+<div class="vh-100 d-flex flex-column">
+  <main class="page-wrapper">
+    <div class="d-lg-flex position-relative h-100">
+      <a
+        class="text-nav btn btn-icon bg-light border rounded-circle position-absolute top-0 end-0 p-0 mt-3 me-3 mt-sm-4 me-sm-4"
+        routerLink="/"
+        ngbTooltip="Back to home"
+        data-bs-toggle="tooltip"
+        placement="left"
+        title="Back to home"
+        aria-label="Back to home"
+      >
+        <i class="ai-home"></i>
+      </a>
 
-<!--<section class="register-account">
-  <div class="signform">
-    <div class="right">
-      <form style="margin-left: 30%;" [formGroup]="formLogin">
-        <div class="container-fluid">
-          <section>
-            <h1 style="margin: 15px;color:rgb(8, 82, 141);font-family:'Times New Roman', Times, serif;font-size: 25px;">Iniciar Sesion</h1>
-          </section>
-          <div class="row">
-            <div class="col-12 col-md-6">
-              <app-form [control]="formLogin.controls.email" type="email" label="Email" placeHolder="ejemplo@gmail.com"></app-form>
-              <app-form [control]="formLogin.controls.clave" type="password" label="Password" placeHolder=""></app-form>
+      <ng-content></ng-content>
+
+      <div
+        class="w-50 bg-size-cover bg-repeat-0 bg-position-center"
+        style="background-image: url(assets/img/account/cover.jpg)"
+      ></div>
+    </div>
+  </main>
+</div>
+
+<div
+    class="d-flex flex-column align-items-center w-lg-50 h-100 px-3 px-lg-5 pt-5"
+  >
+    <div class="w-100 mt-auto" style="max-width: 526px">
+      <h1>Sign in to Around</h1>
+      <p class="pb-3 mb-3 mb-lg-4">
+        Don't have an account yet?&nbsp;&nbsp;<a routerLink="/auth/sign-up"
+          >Register here!</a
+        >
+      </p>
+      <form
+        class="needs-validation"
+        novalidate
+        [formGroup]="loginForm"
+        (ngSubmit)="onSubmit()"
+      >
+        <div class="pb-3 mb-3">
+          <div class="position-relative">
+            <i
+              class="ai-mail fs-lg position-absolute top-50 start-0 translate-middle-y ms-3"
+            ></i>
+            <input
+              class="form-control form-control-lg ps-5"
+              type="email"
+              formControlName="email"
+              placeholder="Email address"
+              required
+            />
+          </div>
+        </div>
+        <div class="mb-4">
+          <div class="position-relative">
+            <i
+              class="ai-lock-closed fs-lg position-absolute top-50 start-0 translate-middle-y ms-3"
+            ></i>
+            <div class="password-toggle">
+              <input
+                class="form-control form-control-lg ps-5"
+                [type]="showPassword ? 'text' : 'password'"
+                formControlName="password"
+                placeholder="Password"
+                required
+              />
+              <label
+                class="password-toggle-btn"
+                aria-label="Show/hide password"
+              >
+                <input
+                  class="password-toggle-check"
+                  type="checkbox"
+                  (change)="showPassword = !showPassword"
+                /><span class="password-toggle-indicator"></span>
+              </label>
             </div>
           </div>
-          <a class="container" type="submit" (click)="registrarse()" style="color: blue;">Registrarse</a>
-          <button type="submit" class="subbt" (click)="signIn()" style="width: 200px;"> Ingresar </button>
-          <a class="container" type="submit" (click)="generarClave()" style="color: rgb(0, 0, 255);">Olvide la contraseña</a>
+        </div>
+        <div
+          class="d-flex flex-wrap align-items-center justify-content-between pb-4"
+        >
+          <div class="form-check my-1">
+            <input
+              class="form-check-input"
+              type="checkbox"
+              id="keep-signedin"
+            />
+            <label class="form-check-label ms-1" for="keep-signedin"
+              >Keep me signed in</label
+            >
+          </div>
+          <a
+            class="fs-sm fw-semibold text-decoration-none my-1"
+            routerLink="/auth/password-recovery"
+            >Forgot password?</a
+          >
+        </div>
+        <button class="btn btn-lg btn-primary w-100 mb-4" type="submit">
+          Sign in
+        </button>
 
+        <h2 class="h6 text-center pt-3 pt-lg-4 mb-4">
+          Or sign in with your social account
+        </h2>
+        <div class="row row-cols-1 row-cols-sm-2 gy-3">
+          <div class="col">
+            <a
+              class="btn btn-icon btn-outline-secondary btn-google btn-lg w-100"
+              href="javascript:void(0);"
+            >
+              <i class="ai-google fs-xl me-2"></i>
+              Google
+            </a>
+          </div>
+          <div class="col">
+            <a
+              class="btn btn-icon btn-outline-secondary btn-facebook btn-lg w-100"
+              href="javascript:void(0);"
+            >
+              <i class="ai-facebook fs-xl me-2"></i>
+              Facebook
+            </a>
+          </div>
         </div>
       </form>
     </div>
+
+    <p class="nav w-100 fs-sm pt-5 mt-auto mb-5" style="max-width: 526px">
+      <span class="text-body-secondary"
+        >&copy; All rights reserved. Made by</span
+      ><a
+        class="nav-link d-inline-block p-0 ms-1"
+        href="{{ developBy }}"
+        target="_blank"
+        rel="noopener"
+        >{{ author }}</a
+      >
+    </p>
   </div>
-</section>-->
+  <div class="vh-100 d-flex flex-column">
+    <main class="page-wrapper">
+      <div class="d-lg-flex position-relative h-100">
+        <a
+          class="text-nav btn btn-icon bg-light border rounded-circle position-absolute top-0 end-0 p-0 mt-3 me-3 mt-sm-4 me-sm-4"
+          routerLink="/"
+          ngbTooltip="Back to home"
+          data-bs-toggle="tooltip"
+          placement="left"
+          title="Back to home"
+          aria-label="Back to home"
+        >
+          <i class="ai-home"></i>
+        </a>
+
+        <ng-content></ng-content>
+
+        <div
+          class="w-50 bg-size-cover bg-repeat-0 bg-position-center"
+          style="background-image: url(assets/img/account/cover.jpg)"
+        ></div>
+      </div>
+    </main>
+  </div>

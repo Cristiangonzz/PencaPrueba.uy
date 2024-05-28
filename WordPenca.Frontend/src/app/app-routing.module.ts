@@ -33,6 +33,12 @@ const routes: Routes = [
       import('./presentation/match/match.module').then((m) => m.MatchModule),
   },
   {
+    path: 'login',
+    //canActivate: [BackGuard],
+    loadChildren: () =>
+      import('./presentation/login/login.module').then((m) => m.LoginModule),
+  },
+  {
     path: '**',
     redirectTo: 'List',
     pathMatch: 'full',
