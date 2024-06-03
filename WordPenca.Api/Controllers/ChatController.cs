@@ -2,14 +2,9 @@
 using Microsoft.AspNetCore.Mvc;
 using WordPenca.Common.Dto;
 using WordPenca.Business.Domain;
-using Microsoft.AspNetCore.SignalR;
-using WordPenca.Api.Hubs;
 using WordPenca.Business.Repository.Interface;
-using System;
-using MongoDB.Driver;
 using MongoDB.Bson;
 using WordPenca.Business.Service;
-using Microsoft.AspNetCore.Identity.Data;
 
 
 namespace WordPenca.Api.Controllers

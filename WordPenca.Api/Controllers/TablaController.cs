@@ -4,7 +4,7 @@ using WordPenca.Business.Persistence;
 
 namespace WordPenca.Api.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("[controller]")]
     [ApiController]
     public class TablaController : ControllerBase
     {

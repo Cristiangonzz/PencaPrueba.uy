@@ -97,11 +97,6 @@ builder.Services.AddQuartzHostedService(options =>
     options.WaitForJobsToComplete = true;
 });
 
-
-// builder.Services.AddSingleton<GetMatchesJob>();
-// builder.Services.AddHostedService<QuartzHostedService>();
-
-
 var app = builder.Build();
 
 app.UseSwagger();
