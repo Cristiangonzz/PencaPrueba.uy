@@ -44,6 +44,8 @@ builder.Services.AddSingleton<ChatService>();
 builder.Services.AddSingleton<ChatHistorialService>();
 builder.Services.AddSingleton<ChatMensajeService>();
 builder.Services.AddSingleton<ChatUsuarioService>();
+builder.Services.AddSingleton<RootMatchsService>();
+
 
 
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();

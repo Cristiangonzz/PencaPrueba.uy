@@ -9,15 +9,15 @@ namespace WordPenca.Business.Service
     public class RootMatchsService
     {
 
-        private IMongoCollection<RootMatch> _collection;
+        private readonly IMongoCollection<RootMatch> _collection;
         public RootMatchsService(IMongoClient mongoClient, IOptions<MongoDbSettings> mongoDbSettings)
         {
             var database = mongoClient.GetDatabase(mongoDbSettings.Value.DataBase);
-            _collection = database.GetCollection<RootMatch>(mongoDbSettings.Value.RootMatchCollection);
+            _collection = database.GetCollection<RootMatch>(mongoDbSettings.Value.RootMatchsCollection);
         }
         async public Task<RootMatch> GetRootMatch(Filter filter)
         {
-            return _collection.Find<RootMatch>(x => x.Filters == filter).FirstOrDefault();
+            return _collection.Find<RootMatch>(x => x.Filters.DateTo == filter.DateTo && x.Filters.DateFrom == filter.DateFrom).FirstOrDefault();
         }
         async public Task<List<RootMatch>> GetMatchs()
         {
@@ -29,12 +29,12 @@ namespace WordPenca.Business.Service
             await _collection.InsertOneAsync(rootMatch);
             return rootMatch;
         }
-        async public Task<bool> UpdateRootMatch(Filter filter, RootMatch Match)
+        async public Task<bool> UpdateRootMatch(RootMatch rootMatchs)
         {
             try
             {
-                _collection.ReplaceOne(x => x.Filters == filter, Match);
-                return true;
+                var result = await _collection.ReplaceOneAsync(x => x.Id == rootMatchs.Id, rootMatchs);
+                return result.IsAcknowledged && result.ModifiedCount > 0;
             }
             catch (Exception ex)
             {

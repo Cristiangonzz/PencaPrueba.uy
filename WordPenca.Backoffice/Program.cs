@@ -25,6 +25,8 @@ builder.Services.AddSingleton<ChatService>();
 builder.Services.AddSingleton<ChatHistorialService>();
 builder.Services.AddSingleton<ChatMensajeService>();
 builder.Services.AddSingleton<ChatUsuarioService>();
+builder.Services.AddSingleton<RootMatchsService>();
+
 
 
 
@@ -47,7 +49,7 @@ var app = builder.Build();
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
-   app.UseMigrationsEndPoint();
+    app.UseMigrationsEndPoint();
 }
 
 app.UseHttpsRedirection();

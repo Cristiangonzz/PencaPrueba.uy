@@ -63,13 +63,13 @@ namespace WordPenca.Api.Controllers
                 if (response.IsSuccessStatusCode)
                 {
                     //var body = await response.Content.ReadAsStringAsync();
-                    
+
 
                     var body = await response.Content.ReadAsStringAsync();
                     RootMatch matchesData = JsonConvert.DeserializeObject<RootMatch>(body);
                     Console.WriteLine("Corriendo");
-                    return Ok(matchesData);        
-            
+                    return Ok(matchesData);
+
                     //await _hubContext.Clients.Group(message.ChatId).SendAsync("NewMessage", message);
 
                     return StatusCode(StatusCodes.Status200OK, body);

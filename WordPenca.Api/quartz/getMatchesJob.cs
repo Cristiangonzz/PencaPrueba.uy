@@ -3,6 +3,7 @@ using Newtonsoft.Json;
 using Quartz;
 using WordPenca.Api.Hubs;
 using WordPenca.Business.Domain;
+using WordPenca.Business.Service;
 
 
 namespace WordPenca.Api.quartz
@@ -12,12 +13,15 @@ namespace WordPenca.Api.quartz
         private readonly ILogger<GetMatchesJob> _logger;
         private readonly IHttpClientFactory _httpClientFactory;
         private readonly IHubContext<MessageHub> _hubContext;
+        private readonly RootMatchsService _rootMatchService;
 
-        public GetMatchesJob(ILogger<GetMatchesJob> logger, IHttpClientFactory httpClientFactory,IHubContext<MessageHub> hubContext)
+        public GetMatchesJob(ILogger<GetMatchesJob> logger, RootMatchsService rootMatchService, IHttpClientFactory httpClientFactory, IHubContext<MessageHub> hubContext)
         {
             _logger = logger;
             _httpClientFactory = httpClientFactory;
             _hubContext = hubContext;
+            _rootMatchService = rootMatchService;
+
         }
 
         public async Task Execute(IJobExecutionContext context)
@@ -37,7 +41,7 @@ namespace WordPenca.Api.quartz
             };
 
             //Armar el mensaje que voy a enviar
-            
+
             using (var response = await client.SendAsync(request))
             {
                 response.EnsureSuccessStatusCode();
@@ -46,12 +50,19 @@ namespace WordPenca.Api.quartz
                 {
                     var body = await response.Content.ReadAsStringAsync();
                     RootMatch matchsData = JsonConvert.DeserializeObject<RootMatch>(body);
-                    Console.WriteLine("Corriendo");
-                    _logger.LogInformation("Matches data: {data}", matchsData);
-
-
-                    //await _hubContext.Clients.Group("Match").SendAsync("NewMatch", matchsData);
                     await _hubContext.Clients.All.SendAsync("NewMatch", matchsData);
+                    RootMatch matchsDataMongo = await _rootMatchService.GetRootMatch(matchsData.Filters);
+
+                    if (matchsDataMongo == null)
+                    {
+                        await _rootMatchService.CreateRootMatch(matchsData);
+                    }
+                    else
+                    {
+                        await _rootMatchService.UpdateRootMatch(matchsData);
+
+                    }
+
                 }
                 else
                 {
