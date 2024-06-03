@@ -9,6 +9,8 @@ namespace WordPenca.Business.Domain
         string ChatHistorialCollection { get; set; }
         string ChatMensajeCollection { get; set; }
         string ChatUsuarioCollection { get; set; }
+        string MatchCollection { get; set; }
+
 
     }
 }
