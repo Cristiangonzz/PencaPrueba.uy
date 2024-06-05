@@ -4,9 +4,9 @@ namespace WordPenca.Business.Domain
 {
     public class Coach
     {
-        [BsonId]
-        public int Id { get; set; }
-        public string? Name { get; set; }
-        public string? Nationality { get; set; }
+
+        public int? id { get; set; }
+        public string? name { get; set; }
+        public string? nationality { get; set; }
     }
 }

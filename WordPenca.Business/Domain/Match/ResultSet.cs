@@ -1,11 +1,22 @@
+using System.Text.Json.Serialization;
+
 namespace WordPenca.Business.Domain
 {
     public class ResultSet
     {
-        public int Count { get; set; }
-        public string? Competitions { get; set; }
-        public DateOnly First { get; set; }
-        public DateOnly Last { get; set; }
-        public int Played { get; set; }
+        [JsonPropertyName("count")]
+        public int? count { get; set; }
+
+        [JsonPropertyName("competitions")]
+        public string? competitions { get; set; }
+
+        [JsonPropertyName("first")]
+        public string? first { get; set; }
+
+        [JsonPropertyName("last")]
+        public string? last { get; set; }
+
+        [JsonPropertyName("played")]
+        public int? played { get; set; }
     }
 }

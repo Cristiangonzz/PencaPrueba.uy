@@ -1,4 +1,4 @@
-using MongoDB.Bson;
+using System.Text.Json.Serialization;
 using MongoDB.Bson.Serialization.Attributes;
 
 namespace WordPenca.Business.Domain
@@ -6,10 +6,19 @@ namespace WordPenca.Business.Domain
     public class Team
     {
         [BsonId]
-        public int Id { get; set; }
-        public string? Name { get; set; }
-        public string? ShortName { get; set; }
-        public string? Tla { get; set; }
-        public string? Crest { get; set; }
+        [JsonPropertyName("id")]
+        public int? id { get; set; }
+
+        [JsonPropertyName("name")]
+        public string? name { get; set; }
+
+        [JsonPropertyName("shortName")]
+        public string? shortName { get; set; }
+
+        [JsonPropertyName("tla")]
+        public string? tla { get; set; }
+
+        [JsonPropertyName("crest")]
+        public string? crest { get; set; }
     }
 }

@@ -14,31 +14,42 @@ namespace WordPenca.Api.quartz
         private readonly IHttpClientFactory _httpClientFactory;
         private readonly IHubContext<MessageHub> _hubContext;
         private readonly RootMatchsService _rootMatchService;
+        private readonly MatchService _matchService;
 
-        public GetMatchesJob(ILogger<GetMatchesJob> logger, RootMatchsService rootMatchService, IHttpClientFactory httpClientFactory, IHubContext<MessageHub> hubContext)
+
+        public GetMatchesJob(MatchService matchService, ILogger<GetMatchesJob> logger, RootMatchsService rootMatchService, IHttpClientFactory httpClientFactory, IHubContext<MessageHub> hubContext)
         {
             _logger = logger;
             _httpClientFactory = httpClientFactory;
             _hubContext = hubContext;
             _rootMatchService = rootMatchService;
-
+            _matchService = matchService;
         }
 
         public async Task Execute(IJobExecutionContext context)
         {
             _logger.LogInformation("GetMatches method called at {time}", DateTimeOffset.Now);
 
+            // Crear las fechas usando DateOnly
+            DateOnly dateFrom = DateOnly.FromDateTime(DateTime.Now);
+            DateOnly dateTo = dateFrom.AddDays(1);
+
+            // Formatear las fechas como cadenas
+            string dateFromString = $"{dateFrom:yyyy-MM-dd}";
+            string dateToString = $"{dateTo:yyyy-MM-dd}";
+
             var client = _httpClientFactory.CreateClient();
 
             var request = new HttpRequestMessage
             {
                 Method = HttpMethod.Get,
-                RequestUri = new Uri("https://api.football-data.org/v4/matches"),
+                RequestUri = new Uri($"https://api.football-data.org/v4/matches?dateFrom={dateFromString}&dateTo={dateToString}"),
                 Headers =
                 {
                     { "X-Auth-Token", "5e5f4b403ed749dcb7065634af5e8dc4" }
                 },
             };
+            System.Console.WriteLine("https://api.football-data.org/v4/matches?dateFrom=" + dateFromString + "&dateTo=" + dateToString);
 
             //Armar el mensaje que voy a enviar
 
@@ -49,18 +60,23 @@ namespace WordPenca.Api.quartz
                 if (response.IsSuccessStatusCode)
                 {
                     var body = await response.Content.ReadAsStringAsync();
+
                     RootMatch matchsData = JsonConvert.DeserializeObject<RootMatch>(body);
+
                     await _hubContext.Clients.All.SendAsync("NewMatch", matchsData);
-                    RootMatch matchsDataMongo = await _rootMatchService.GetRootMatch(matchsData.Filters);
+
+                    RootMatch matchsDataMongo = await _rootMatchService.GetRootMatch(dateToString, dateFromString);
 
                     if (matchsDataMongo == null)
                     {
                         await _rootMatchService.CreateRootMatch(matchsData);
+                        await _matchService.CreateMatchs(matchsData.matches);
+
                     }
                     else
                     {
                         await _rootMatchService.UpdateRootMatch(matchsData);
-
+                        await _matchService.UpdateMatchs(matchsData.matches);
                     }
 
                 }

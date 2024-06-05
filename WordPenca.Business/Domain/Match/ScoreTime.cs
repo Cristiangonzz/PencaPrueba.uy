@@ -1,8 +1,13 @@
+using System.Text.Json.Serialization;
+
 namespace WordPenca.Business.Domain
 {
     public class ScoreTime
     {
-        public object? Home { get; set; }
-        public object? Away { get; set; }
+        [JsonPropertyName("home")]
+        public int? home { get; set; }
+
+        [JsonPropertyName("away")]
+        public int? away { get; set; }
     }
 }

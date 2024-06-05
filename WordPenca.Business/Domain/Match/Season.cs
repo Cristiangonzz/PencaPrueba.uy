@@ -1,15 +1,24 @@
+using System.Text.Json.Serialization;
 using MongoDB.Bson.Serialization.Attributes;
 
 namespace WordPenca.Business.Domain
 {
     public class Season
     {
-        [BsonId]
-        public int Id { get; set; }
-        public DateTime StartDate { get; set; }
-        public DateTime EndDate { get; set; }
-        public int CurrentMatchday { get; set; }
-        public object? Winner { get; set; }
-        public List<string>? Stages { get; set; }
+        [JsonPropertyName("id")]
+        public int? id { get; set; }
+
+        [JsonPropertyName("startDate")]
+        public string? startDate { get; set; }
+
+        [JsonPropertyName("endDate")]
+        public string? endDate { get; set; }
+
+        [JsonPropertyName("currentMatchday")]
+        public int? currentMatchday { get; set; }
+
+        [JsonPropertyName("winner")]
+        public object? winner { get; set; }
     }
+
 }

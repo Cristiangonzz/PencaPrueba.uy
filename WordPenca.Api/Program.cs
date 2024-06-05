@@ -89,7 +89,7 @@ builder.Services.AddQuartz(q =>
     q.AddTrigger(opts => opts
         .ForJob(jobKey)
         .WithIdentity("GetMatchesJob-trigger")
-        .WithCronSchedule("0/10 * * * * ?")); // Every 6 seconds
+        .WithCronSchedule("0/55 * * * * ?"));
 });
 
 builder.Services.AddQuartzHostedService(options =>

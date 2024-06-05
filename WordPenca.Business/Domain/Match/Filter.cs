@@ -1,9 +1,16 @@
+using System.Text.Json.Serialization;
+
 namespace WordPenca.Business.Domain
 {
     public class Filter
     {
-        public DateOnly DateFrom { get; set; }
-        public DateOnly DateTo { get; set; }
-        public string Permission { get; set; }
+        [JsonPropertyName("dateFrom")]
+        public string? dateFrom { get; set; }
+
+        [JsonPropertyName("dateTo")]
+        public string? dateTo { get; set; }
+
+        [JsonPropertyName("permission")]
+        public string? permission { get; set; }
     }
 }

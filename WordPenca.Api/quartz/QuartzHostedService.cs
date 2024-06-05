@@ -27,7 +27,7 @@ namespace WordPenca.Api.quartz
 
             var trigger = TriggerBuilder.Create()
                                         .WithIdentity("GetMatchesJobTrigger")
-                                        .WithCronSchedule("0/10 * * * * ?") // Cada 6 segundos
+                                        .WithCronSchedule("0/55 * * * * ?")
                                         .Build();
 
             await Scheduler.ScheduleJob(jobDetail, trigger, cancellationToken);

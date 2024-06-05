@@ -17,7 +17,7 @@ namespace WordPenca.Business.Service
         }
         async public Task<Match> GetMatch(int id)
         {
-            return _collection.Find<Match>(x => x.Id == id).FirstOrDefault();
+            return _collection.Find<Match>(x => x.id == id).FirstOrDefault();
         }
         async public Task<List<Match>> GetMatchs()
         {
@@ -29,11 +29,46 @@ namespace WordPenca.Business.Service
             await _collection.InsertOneAsync(Match);
             return Match;
         }
+
+
+        async public Task<bool> CreateMatchs(List<Match> Matchs)
+        {
+            try
+            {
+                await _collection.InsertManyAsync(Matchs);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                return false;
+            }
+        }
+
+
+        async public Task<bool> UpdateMatchs(List<Match> Matchs)
+        {
+            try
+            {
+                foreach (var Match in Matchs)
+                {
+                    _collection.ReplaceOne(x => x.id == Match.id, Match);
+                }
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                return false;
+            }
+
+        }
+
         async public Task<bool> UpdateMatch(int id, Match Match)
         {
             try
             {
-                _collection.ReplaceOne(x => x.Id == id, Match);
+                _collection.ReplaceOne(x => x.id == id, Match);
                 return true;
             }
             catch (Exception ex)
@@ -46,7 +81,7 @@ namespace WordPenca.Business.Service
         }
         public void RemoveMatch(int id)
         {
-            _collection.DeleteOne(x => x.Id == id);
+            _collection.DeleteOne(x => x.id == id);
         }
     }
 }

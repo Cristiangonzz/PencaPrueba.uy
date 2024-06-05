@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 
@@ -7,9 +8,16 @@ namespace WordPenca.Business.Domain
     {
         [BsonId]
         [BsonRepresentation(BsonType.ObjectId)]
-        public string Id { get; set; }
-        public Filter Filters { get; set; } = null!;
-        public ResultSet ResultSet { get; set; } = null!;
-        public List<Match> Matches { get; set; } = new List<Match>();
+        [JsonPropertyName("_id")]
+        public string? id { get; set; }
+
+        [JsonPropertyName("filters")]
+        public Filter filters { get; set; } = null!;
+
+        [JsonPropertyName("resultSet")]
+        public ResultSet resultSet { get; set; } = null!;
+
+        [JsonPropertyName("matches")]
+        public List<Match> matches { get; set; } = null!;
     }
 }

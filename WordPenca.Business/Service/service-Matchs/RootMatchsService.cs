@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Options;
+using MongoDB.Bson;
 using MongoDB.Driver;
 
 using WordPenca.Business.Domain;
@@ -15,10 +16,16 @@ namespace WordPenca.Business.Service
             var database = mongoClient.GetDatabase(mongoDbSettings.Value.DataBase);
             _collection = database.GetCollection<RootMatch>(mongoDbSettings.Value.RootMatchsCollection);
         }
-        async public Task<RootMatch> GetRootMatch(Filter filter)
+        async public Task<RootMatch> GetRootMatch(string dateTo, string dateFrom)
         {
-            return _collection.Find<RootMatch>(x => x.Filters.DateTo == filter.DateTo && x.Filters.DateFrom == filter.DateFrom).FirstOrDefault();
+            var filter = Builders<RootMatch>.Filter.And(
+                Builders<RootMatch>.Filter.Eq(x => x.filters.dateTo, dateTo),
+                Builders<RootMatch>.Filter.Eq(x => x.filters.dateFrom, dateFrom)
+            );
+
+            return await _collection.Find(filter).FirstOrDefaultAsync();
         }
+
         async public Task<List<RootMatch>> GetMatchs()
         {
             return await _collection.Find<RootMatch>(x => true).ToListAsync();
@@ -33,7 +40,7 @@ namespace WordPenca.Business.Service
         {
             try
             {
-                var result = await _collection.ReplaceOneAsync(x => x.Id == rootMatchs.Id, rootMatchs);
+                var result = await _collection.ReplaceOneAsync(x => x.id == rootMatchs.id, rootMatchs);
                 return result.IsAcknowledged && result.ModifiedCount > 0;
             }
             catch (Exception ex)
@@ -46,7 +53,7 @@ namespace WordPenca.Business.Service
         }
         public void RemoveRootMatch(Filter filter)
         {
-            _collection.DeleteOne(x => x.Filters == filter);
+            _collection.DeleteOne(x => x.filters == filter);
         }
     }
 }
