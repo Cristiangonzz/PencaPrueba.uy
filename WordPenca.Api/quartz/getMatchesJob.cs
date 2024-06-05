@@ -67,13 +67,13 @@ namespace WordPenca.Api.quartz
 
                     RootMatch matchsDataMongo = await _rootMatchService.GetRootMatch(dateToString, dateFromString);
 
-                    if (matchsDataMongo == null)
+                    if (matchsDataMongo == null && matchsData != null)
                     {
                         await _rootMatchService.CreateRootMatch(matchsData);
                         await _matchService.CreateMatchs(matchsData.matches);
 
                     }
-                    else
+                    else if (matchsDataMongo != null && matchsData != null)
                     {
                         await _rootMatchService.UpdateRootMatch(matchsData);
                         await _matchService.UpdateMatchs(matchsData.matches);

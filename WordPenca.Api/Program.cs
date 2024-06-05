@@ -45,6 +45,7 @@ builder.Services.AddSingleton<ChatHistorialService>();
 builder.Services.AddSingleton<ChatMensajeService>();
 builder.Services.AddSingleton<ChatUsuarioService>();
 builder.Services.AddSingleton<RootMatchsService>();
+builder.Services.AddSingleton<MatchService>();
 
 
 
@@ -89,7 +90,7 @@ builder.Services.AddQuartz(q =>
     q.AddTrigger(opts => opts
         .ForJob(jobKey)
         .WithIdentity("GetMatchesJob-trigger")
-        .WithCronSchedule("0/55 * * * * ?"));
+        .WithCronSchedule("0/20 * * * * ?"));
 });
 
 builder.Services.AddQuartzHostedService(options =>
