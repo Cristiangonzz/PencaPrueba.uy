@@ -10,10 +10,17 @@ namespace WordPenca.Business.Service
     {
 
         private IMongoCollection<Match> _collection;
-        public MatchService(IMongoClient mongoClient, IOptions<MongoDbSettings> mongoDbSettings)
+
+
+        private readonly TeamService _teamService;
+        private readonly CompetitionService _competitionService;
+
+        public MatchService(CompetitionService competitionService, TeamService teamService, RootMatchsService rootMatchService, IMongoClient mongoClient, IOptions<MongoDbSettings> mongoDbSettings)
         {
             var database = mongoClient.GetDatabase(mongoDbSettings.Value.DataBase);
             _collection = database.GetCollection<Match>(mongoDbSettings.Value.MatchCollection);
+            _teamService = teamService;
+            _competitionService = competitionService;
         }
         async public Task<Match> GetMatch(int id)
         {
@@ -28,6 +35,12 @@ namespace WordPenca.Business.Service
         {
             await _collection.InsertOneAsync(Match);
             return Match;
+        }
+
+        async public Task<List<Match>> GetMatchToCompetition(int idCompetition)
+        {
+            var filter = Builders<Match>.Filter.Eq(m => m.competition.id, idCompetition);
+            return await _collection.Find(filter).ToListAsync();
         }
 
 
@@ -82,6 +95,28 @@ namespace WordPenca.Business.Service
         public void RemoveMatch(int id)
         {
             _collection.DeleteOne(x => x.id == id);
+        }
+
+
+
+        public async Task CreateOrUpdateMatchesAsync(List<Match> matches)
+        {
+            foreach (var match in matches)
+            {
+                var filter = Builders<Match>.Filter.Eq(m => m.id, match.id); // Cambia MatchId al campo correcto
+                var updateOptions = new UpdateOptions { IsUpsert = true };
+
+                await _collection.ReplaceOneAsync(
+                    filter,
+                    match,
+                    updateOptions
+                );
+
+                await _teamService.CreateTeam(match.homeTeam);
+                await _teamService.CreateTeam(match.awayTeam);
+                await _competitionService.CreateCompetition(match.competition);
+
+            }
         }
     }
 }

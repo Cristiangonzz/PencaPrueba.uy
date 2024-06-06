@@ -15,14 +15,19 @@ namespace WordPenca.Api.Controllers
         private readonly RootMatchsService _rootMatchService;
         private readonly MatchService _matchService;
 
+        private readonly TeamService _teamService;
+        private readonly CompetitionService _competitionService;
+
         private readonly IHttpClientFactory _httpClientFactory;
 
 
-        public PartidoController(RootMatchsService rootMatchService, MatchService matchService, IHttpClientFactory httpClientFactory)
+        public PartidoController(CompetitionService competitionService, TeamService teamService, RootMatchsService rootMatchService, MatchService matchService, IHttpClientFactory httpClientFactory)
         {
             _rootMatchService = rootMatchService;
             _matchService = matchService;
             _httpClientFactory = httpClientFactory;
+            _teamService = teamService;
+            _competitionService = competitionService;
 
         }
 
@@ -123,14 +128,18 @@ namespace WordPenca.Api.Controllers
                         if (matchsDataMongo == null)
                         {
                             await _rootMatchService.CreateRootMatch(matchsData);
-                            await _matchService.CreateMatchs(matchsData.matches);
+                            await _matchService.CreateOrUpdateMatchesAsync(matchsData.matches);
+                            //await _teamService.CreateTeamsToMatchs(matchsData.matches);
+                            //await _competitionService.CreateCompetitionsToMatchs(matchsData.matches);
                             _ResponseDTO = new ResponseDTO<RootMatch>() { status = true, msg = "ok", value = matchsData };
 
                         }
                         else
                         {
                             await _rootMatchService.UpdateRootMatch(matchsData);
-                            await _matchService.UpdateMatchs(matchsData.matches);
+                            await _matchService.CreateOrUpdateMatchesAsync(matchsData.matches);
+                            // await _teamService.UpdateTeamsToMatchs(matchsData.matches);
+                            //  await _competitionService.UpdateCompetitionsToMatchs(matchsData.matches);
                             _ResponseDTO = new ResponseDTO<RootMatch>() { status = true, msg = "ok", value = matchsData };
 
                         }
@@ -158,6 +167,28 @@ namespace WordPenca.Api.Controllers
             {
                 _ResponseDTO = new ResponseDTO<RootMatch>() { status = false, msg = ex.Message, value = null };
                 return StatusCode(StatusCodes.Status500InternalServerError, _ResponseDTO);
+            }
+        }
+
+        [HttpGet]
+        [Route("Matches/competition/{idCompetition}")]
+        public async Task<IActionResult> GetMatchesByCompetition([FromRoute] int idCompetition)
+        {
+            try
+            {
+                var matches = await _matchService.GetMatchToCompetition(idCompetition);
+                if (matches != null && matches.Count > 0)
+                {
+                    return Ok(new ResponseDTO<List<Match>> { status = true, msg = "ok", value = matches });
+                }
+                else
+                {
+                    return NotFound(new ResponseDTO<List<Match>> { status = false, msg = "No matches found for the given competition.", value = null });
+                }
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new ResponseDTO<List<Match>> { status = false, msg = ex.Message, value = null });
             }
         }
 

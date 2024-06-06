@@ -5,6 +5,7 @@ namespace WordPenca.Business.Domain
 {
     public class Competition
     {
+        [BsonId]
         [JsonPropertyName("id")]
         public int? id { get; set; }
 

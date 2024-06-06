@@ -46,6 +46,8 @@ builder.Services.AddSingleton<ChatMensajeService>();
 builder.Services.AddSingleton<ChatUsuarioService>();
 builder.Services.AddSingleton<RootMatchsService>();
 builder.Services.AddSingleton<MatchService>();
+builder.Services.AddSingleton<CompetitionService>();
+builder.Services.AddSingleton<TeamService>();
 
 
 

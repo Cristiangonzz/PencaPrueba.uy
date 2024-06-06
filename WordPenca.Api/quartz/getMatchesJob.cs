@@ -15,15 +15,19 @@ namespace WordPenca.Api.quartz
         private readonly IHubContext<MessageHub> _hubContext;
         private readonly RootMatchsService _rootMatchService;
         private readonly MatchService _matchService;
+        private readonly TeamService _teamService;
+        private readonly CompetitionService _competitionService;
 
 
-        public GetMatchesJob(MatchService matchService, ILogger<GetMatchesJob> logger, RootMatchsService rootMatchService, IHttpClientFactory httpClientFactory, IHubContext<MessageHub> hubContext)
+        public GetMatchesJob(CompetitionService competitionService, TeamService teamService, MatchService matchService, ILogger<GetMatchesJob> logger, RootMatchsService rootMatchService, IHttpClientFactory httpClientFactory, IHubContext<MessageHub> hubContext)
         {
             _logger = logger;
             _httpClientFactory = httpClientFactory;
             _hubContext = hubContext;
             _rootMatchService = rootMatchService;
             _matchService = matchService;
+            _teamService = teamService;
+            _competitionService = competitionService;
         }
 
         public async Task Execute(IJobExecutionContext context)
@@ -70,13 +74,17 @@ namespace WordPenca.Api.quartz
                     if (matchsDataMongo == null && matchsData != null)
                     {
                         await _rootMatchService.CreateRootMatch(matchsData);
-                        await _matchService.CreateMatchs(matchsData.matches);
+                        await _matchService.CreateOrUpdateMatchesAsync(matchsData.matches);
+                        // await _teamService.CreateTeamsToMatchs(matchsData.matches);
+                        // await _competitionService.CreateCompetitionsToMatchs(matchsData.matches);
 
                     }
                     else if (matchsDataMongo != null && matchsData != null)
                     {
                         await _rootMatchService.UpdateRootMatch(matchsData);
-                        await _matchService.UpdateMatchs(matchsData.matches);
+                        await _matchService.CreateOrUpdateMatchesAsync(matchsData.matches);
+                        // await _teamService.UpdateTeamsToMatchs(matchsData.matches);
+                        // await _competitionService.UpdateCompetitionsToMatchs(matchsData.matches);
                     }
 
                 }
