@@ -67,7 +67,7 @@ namespace WordPenca.Api.quartz
 
                     RootMatch matchsData = JsonConvert.DeserializeObject<RootMatch>(body);
 
-                    await _hubContext.Clients.All.SendAsync("NewMatch", matchsData);
+                    //await _hubContext.Clients.All.SendAsync("NewMatch", matchsData); // Lo podemos usar para los partidos de hoy
 
                     RootMatch matchsDataMongo = await _rootMatchService.GetRootMatch(dateToString, dateFromString);
 
